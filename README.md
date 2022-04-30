@@ -8,8 +8,11 @@ Pressing the scan button starts a serial device scan. It will continue to run fo
 You can click on a Device and give it a new name.
 The REd X to the right of a port removes the new name but doesn't delete the port.
 
+2:{path: 'COM16', manufacturer: 'FTDI', serialNumber: '7&5261f68&0&4', pnpId: 'FTDIBUS\\VID_0403+PID_6010+7&5261F68&0&4&1\\0000', locationId: undefined, …}
+3:{path: 'COM17', manufacturer: 'FTDI', serialNumber: '7&5261f68&0&4', pnpId: 'FTDIBUS\\VID_0403+PID_6010+7&5261F68&0&4&2\\0000', locationId: undefined, …}
 For example if there is an image subfolder under your extension project workspace:
 
+![COMPROGRAMMING](./resources/SerialDevices.gif)
 \!\[feature X\]\(images/feature-x.png\)
 
 > Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
