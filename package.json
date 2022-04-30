@@ -10,6 +10,7 @@
     "Other"
   ],
   "activationEvents": [
+    "workspaceContains:**/*.ino",
     "onCommand:serialdevices.helloWorld",
     "onView:SerialDeviceProviderService"
   ],
@@ -39,6 +40,14 @@
           "light": "./resources/refresh.svg",
           "dark": "./resources/refresh.svg"
         }
+      },
+      {
+        "command": "serialdevices.unrename",
+        "title": "UnEdit",
+        "icon": {
+          "light": "./resources/delete.svg",
+          "dark": "./resources/delete_drk.svg"
+        }
       }
     ],
     "menus": {
@@ -52,6 +61,11 @@
       "view/item/context": [
         {
           "command": "serialdevices.editEntry",
+          "when": "view == SerialDeviceProviderService",
+          "group": "inline"
+        },
+        {
+          "command": "serialdevices.unrename",
           "when": "view == SerialDeviceProviderService",
           "group": "inline"
         }
@@ -86,5 +100,8 @@
     "mocha": "^9.2.1",
     "typescript": "^4.5.5",
     "@vscode/test-electron": "^2.1.2"
+  },
+  "dependencies": {
+    "serialport": "^10.4.0"
   }
 }
