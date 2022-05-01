@@ -88,8 +88,8 @@ class SerialProvider {
             this._coms = await this.mySerialD().then(function (value) {
                 return value;
             });
-            console.log("this._coms.length");
-            console.log(this._coms.length);
+            // console.log("this._coms.length");
+            // console.log(this._coms.length);
             if (oldcomcount === 0) {
                 oldcomcount = this._coms.length;
                 old_coms = this._coms;
@@ -295,10 +295,6 @@ class SerialProvider {
                         command: "serialdevices.renameEntry",
                         title: coms[i].Caption,
                         tooltip: `DeviceID:  ${coms[i].DeviceID}`,
-                        // PID:  ${this.info.productId}
-                        // ${locale['manufacturer']}: ${this.info.manufacturer}
-                        // ${locale['serialNumber']}: ${this.info.serialNumber}
-                        // * ${locale['click_to']} ${this.port.isOpen ? locale['disconnect'] : locale['connect']}`;
                     }, "com", coms[i]);
                     treeSerialD[i].command.arguments = [treeSerialD[i]];
                     treeSerialD[i].id = i.toString();
@@ -331,7 +327,7 @@ class SerialProvider {
                     */
                     console.log(cption);
                     treeSerialD[i + plus] = new SerialD(cption, vscode_1.TreeItemCollapsibleState.None, {
-                        command: "serialdevices.renameEntry",
+                        command: "",
                         title: this._comChanged[i].Caption,
                         tooltip: `DeviceID:  ${this._comChanged[i].DeviceID}`,
                     }, "com", this._comChanged[i]);

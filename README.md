@@ -1,25 +1,26 @@
-# serialdevices README
+# Serial Devices
 
-This is useful for microcontroller development. It lists the Serial Device and allows for giving them a name. So instead of seeing COM3, you can rename it to ESP32_SENSOR. Since Com port numbers change, it uses the DeviceID/pnpid to be more accurate for the search.
+This is useful for microcontroller development. It lists the Serial Device and allows for giving them an alternate name. So instead of seeing COM3, you can rename it to ESP32_SENSOR. Since Com port numbers change, it uses the DeviceID/pnpid to be more accurate for the search when checking for name.
 
 ## Features
 
-Pressing the scan button starts a serial device scan. It will continue to run for about 15 seconds or until a device has been pluggedin or removed.  
+Pressing the scan button starts a serial device scan. It will continue to run for about 15 seconds or until a device has been plugged-in or removed.  
 You can click on a Device and give it a new name.
-The REd X to the right of a port removes the new name but doesn't delete the port.
+The Red X to the right of a port removes the new name but doesn't delete the port.
 
-2:{path: 'COM16', manufacturer: 'FTDI', serialNumber: '7&5261f68&0&4', pnpId: 'FTDIBUS\\VID_0403+PID_6010+7&5261F68&0&4&1\\0000', locationId: undefined, …}
-3:{path: 'COM17', manufacturer: 'FTDI', serialNumber: '7&5261f68&0&4', pnpId: 'FTDIBUS\\VID_0403+PID_6010+7&5261F68&0&4&2\\0000', locationId: undefined, …}
-For example if there is an image subfolder under your extension project workspace:
+I have an ESP32 Debugger that show sup as two ports.
+If you notive below the serial numbers is the same for both COM16 and COM17. If I used the serial number as the search criteria, both ports would be named the same.
+
+`{path: 'COM16', manufacturer: 'FTDI', serialNumber: '7&5261f68&0&4', pnpId: 'FTDIBUS\\VID_0403+PID_6010+7&5261F68&0&4&1\\0000', locationId: undefined, …}`
+
+`{path: 'COM17', manufacturer: 'FTDI', serialNumber: '7&5261f68&0&4', pnpId: 'FTDIBUS\\VID_0403+PID_6010+7&5261F68&0&4&2\\0000', locationId: undefined, …}`
 
 ![COMPROGRAMMING](./resources/SerialDevices.gif)
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+I had wrote my own Serial Port scanner using .NET Core as I wasnt sure the best one to use until I looked at the extension details for the Arduno VSC plugin.  
+So I switched my code to use this one. https://serialport.io/docs/
 
 ## Extension Settings
 
@@ -32,45 +33,10 @@ This extension contributes the following settings:
 - `myExtension.enable`: enable/disable this extension
 - `myExtension.thing`: set to `blah` to do something
 
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+Initial version soon to be released after more cleanup of the code. This was my first Visual Studio Code extension and it changed so many times.
 
 ### 1.0.0
 
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-- [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-- Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-- Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-- Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-- [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-- [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+Initial release

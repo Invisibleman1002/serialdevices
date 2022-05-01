@@ -225,8 +225,8 @@ https://stackoverflow.com/questions/42464838/what-is-the-most-efficient-way-to-d
     this._coms = await this.mySerialD().then(function (value) {
       return value;
     });
-    console.log("this._coms.length");
-    console.log(this._coms.length);
+    // console.log("this._coms.length");
+    // console.log(this._coms.length);
     if (oldcomcount === 0) {
       oldcomcount = this._coms.length;
       old_coms = this._coms;
@@ -337,10 +337,6 @@ https://stackoverflow.com/questions/42464838/what-is-the-most-efficient-way-to-d
               command: "serialdevices.renameEntry",
               title: coms[i].Caption,
               tooltip: `DeviceID:  ${coms[i].DeviceID}`,
-              // PID:  ${this.info.productId}
-              // ${locale['manufacturer']}: ${this.info.manufacturer}
-              // ${locale['serialNumber']}: ${this.info.serialNumber}
-              // * ${locale['click_to']} ${this.port.isOpen ? locale['disconnect'] : locale['connect']}`;
             },
             "com",
             coms[i]
@@ -384,7 +380,7 @@ https://stackoverflow.com/questions/42464838/what-is-the-most-efficient-way-to-d
             cption,
             TreeItemCollapsibleState.None,
             {
-              command: "serialdevices.renameEntry",
+              command: "",
               title: this._comChanged[i].Caption,
               tooltip: `DeviceID:  ${this._comChanged[i].DeviceID}`,
             },
