@@ -8,6 +8,7 @@ import {
   Command,
   window,
   Memento,
+  extensions,
 } from "vscode";
 import { join } from "path";
 import { spawn } from "child_process";
@@ -33,6 +34,24 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
     SerialPort.list().then(function (value) {
       console.log("value");
       console.log(value);
+    });
+    const valueOfVid = parseInt("0403", 16);
+    const valueOfPid = parseInt("6001", 16);
+    // console.log(extensions.all.map((x) => x.id));
+    SerialPort.list().then(function (value) {
+      value.find((p) => {
+        // The pid and vid returned by SerialPortCtrl start with 0x prefix in Mac, but no 0x prefix in Win32.
+        // Should compare with decimal value to keep compatibility.
+        if (p.productId && p.vendorId) {
+          console.log("value");
+          console.log(value);
+          console.log(
+            parseInt(p.productId, 16) === valueOfPid &&
+              parseInt(p.vendorId, 16) === valueOfVid
+          );
+        }
+        //return false;
+      });
     });
     this._storage = storage;
     // constructor(context: ExtensionContext) {
@@ -152,6 +171,8 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
         Caption: item.jsondata.Caption,
         DeviceID: item.jsondata.DeviceID,
         Usernamed: data,
+        vendorId: item.jsondata.vendorId,
+        productId: item.jsondata.productId,
       });
       // Memn;
       // ExtensionContext.workspaceState.update("DEV", response);
@@ -179,6 +200,8 @@ https://stackoverflow.com/questions/42464838/what-is-the-most-efficient-way-to-d
             Name: p.Name,
             Caption: p.Caption,
             Usernamed: p.Usernamed,
+            vendorId: p.vendorId,
+            productId: p.productId,
           });
         }
       } else {
@@ -188,6 +211,8 @@ https://stackoverflow.com/questions/42464838/what-is-the-most-efficient-way-to-d
           Name: p.Name,
           Caption: p.Caption,
           Usernamed: p.Usernamed,
+          vendorId: p.vendorId,
+          productId: p.productId,
         });
       }
       return result;
@@ -412,6 +437,8 @@ https://stackoverflow.com/questions/42464838/what-is-the-most-efficient-way-to-d
         Name: (port as any).friendlyName ?? port.manufacturer,
         DeviceID: port.pnpId!,
         Usernamed: undefined,
+        vendorId: port.vendorId,
+        productId: port.productId,
         // productId: port.productId,
       };
     });
@@ -469,16 +496,11 @@ class Com {
   Caption: string = "";
   DeviceID: string = "";
   Usernamed: string | undefined;
+  productId: string | undefined;
+  vendorId: string | undefined;
 }
 class ComPlus extends Com {
   event: string = "";
-}
-
-interface ISerialPortDetail {
-  Name: string;
-  Caption: string;
-  DeviceID: string;
-  Usernamed: string | undefined;
 }
 export class SerialD extends TreeItem {
   constructor(

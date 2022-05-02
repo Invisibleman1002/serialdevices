@@ -15,23 +15,28 @@ If you notive below the serial numbers is the same for both COM16 and COM17. If 
 
 `{path: 'COM17', manufacturer: 'FTDI', serialNumber: '7&5261f68&0&4', pnpId: 'FTDIBUS\\VID_0403+PID_6010+7&5261F68&0&4&2\\0000', locationId: undefined, …}`
 
-![COMPROGRAMMING](./resources/SerialDevices.gif)
+![COMPROGRAMMING](./assets/SerialDevices.gif)
 
 ## Requirements
 
-I had wrote my own Serial Port scanner using .NET Core as I wasnt sure the best one to use until I looked at the extension details for the Arduno VSC plugin.  
-So I switched my code to use this one. https://serialport.io/docs/
+I had wrote my own Serial Port scanner using .NET Core as I wasnt sure the best one to use until I looked at the extension details for the Arduno VSC plugin.
+
+- I switched my code to use this one. https://serialport.io/docs/
+
+## HELP
+
+If you have the arduino extension installed, the code will execute the command below when clicking the arduino icon.
+THe problem is, it just shows the QuickPick window, but wont send it the correct port. Does anyone know how to send that extension the Port update?
+
+`commands.executeCommand("arduino.selectSerialPort", "0x0403", "0x6001")`
+
+The above command actually runs this command:
+
+`public async selectSerialPort(vid: string, pid: string)`
+
+Sadly it does not work, just opens the quick pick but doesnt use the details to select the port.
 
 ## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-- `myExtension.enable`: enable/disable this extension
-- `myExtension.thing`: set to `blah` to do something
 
 ## Release Notes
 

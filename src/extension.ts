@@ -9,7 +9,7 @@ import { SerialProvider, SerialD } from "./serialDeviceprovider";
 export function activate(context: ExtensionContext) {
   // Use the console to output diagnostic information (console.log) and errors (console.error)
   // This line of code will only be executed once when your extension is activated
-  console.log('Congratulations, your extension "serialdevices" is now active!');
+  //console.log('Congratulations, your extension "serialdevices" is now active!');
 
   const serProvider = new SerialProvider(context.globalState);
   window.registerTreeDataProvider("SerialDeviceProviderService", serProvider);
@@ -18,15 +18,32 @@ export function activate(context: ExtensionContext) {
     "serialdevices.DevicesSerial",
     serProvider.onFileClicked
   );
-  commands.registerCommand("serialdevices.getsome", serProvider.getdevices);
+  commands.registerCommand(
+    "serialdevices.getsomedevices",
+    serProvider.getdevices
+  );
   commands.registerCommand("serialdevices.refreshEntry", () =>
     serProvider.dorefresh()
   );
-  commands.registerCommand("serialdevices.editEntry", (node: SerialD) =>
-    window.showInformationMessage(
-      `Successfully called edit entry on ${node.label}.`
-    )
-  );
+
+  // ! this wont work!  I mean, it pops open the Serial Port Selection but wont select it.
+  commands.registerCommand("serialdevices.arduino_sp", (node: SerialD) => {
+    // const valueOfVid = parseInt("0403", 16);
+    // const valueOfPid = parseInt("6001", 16);
+    //This doesnt work, yet...   Maybe there is a way to send the port to the Arduino VSC Ext.
+    if (node.jsondata.vendorId && node.jsondata.productId) {
+      const valueOfVid = parseInt(node.jsondata.vendorId, 16);
+      const valueOfPid = parseInt(node.jsondata.productId, 16);
+      console.log(valueOfPid);
+      commands.executeCommand(
+        "arduino.selectSerialPort",
+        valueOfVid,
+        valueOfPid
+      );
+      //commands.executeCommand("arduino.selectSerialPort", "0x0403", "0x6001")
+    }
+  });
+
   commands.registerCommand("serialdevices.renameEntry", (item: SerialD) =>
     serProvider.tryrename(item)
   );

@@ -11,13 +11,25 @@ const serialDeviceprovider_1 = require("./serialDeviceprovider");
 function activate(context) {
     // Use the console to output diagnostic information (console.log) and errors (console.error)
     // This line of code will only be executed once when your extension is activated
-    console.log('Congratulations, your extension "serialdevices" is now active!');
+    //console.log('Congratulations, your extension "serialdevices" is now active!');
     const serProvider = new serialDeviceprovider_1.SerialProvider(context.globalState);
     vscode_1.window.registerTreeDataProvider("SerialDeviceProviderService", serProvider);
     vscode_1.commands.registerCommand("serialdevices.DevicesSerial", serProvider.onFileClicked);
-    vscode_1.commands.registerCommand("serialdevices.getsome", serProvider.getdevices);
+    vscode_1.commands.registerCommand("serialdevices.getsomedevices", serProvider.getdevices);
     vscode_1.commands.registerCommand("serialdevices.refreshEntry", () => serProvider.dorefresh());
-    vscode_1.commands.registerCommand("serialdevices.editEntry", (node) => vscode_1.window.showInformationMessage(`Successfully called edit entry on ${node.label}.`));
+    // ! this wont work!  I mean, it pops open the Serial Port Selection but wont select it.
+    vscode_1.commands.registerCommand("serialdevices.arduino_sp", (node) => {
+        // const valueOfVid = parseInt("0403", 16);
+        // const valueOfPid = parseInt("6001", 16);
+        //This doesnt work, yet...   Maybe there is a way to send the port to the Arduino VSC Ext.
+        if (node.jsondata.vendorId && node.jsondata.productId) {
+            const valueOfVid = parseInt(node.jsondata.vendorId, 16);
+            const valueOfPid = parseInt(node.jsondata.productId, 16);
+            console.log(valueOfPid);
+            vscode_1.commands.executeCommand("arduino.selectSerialPort", valueOfVid, valueOfPid);
+            //commands.executeCommand("arduino.selectSerialPort", "0x0403", "0x6001")
+        }
+    });
     vscode_1.commands.registerCommand("serialdevices.renameEntry", (item) => serProvider.tryrename(item));
     vscode_1.commands.registerCommand("serialdevices.unrename", (item) => serProvider.removename(item));
     //see output

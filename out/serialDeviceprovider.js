@@ -71,6 +71,8 @@ class SerialProvider {
                     Caption: item.jsondata.Caption,
                     DeviceID: item.jsondata.DeviceID,
                     Usernamed: data,
+                    vendorId: item.jsondata.vendorId,
+                    productId: item.jsondata.productId,
                 });
                 // Memn;
                 // ExtensionContext.workspaceState.update("DEV", response);
@@ -145,6 +147,22 @@ class SerialProvider {
             console.log("value");
             console.log(value);
         });
+        const valueOfVid = parseInt("0403", 16);
+        const valueOfPid = parseInt("6001", 16);
+        // console.log(extensions.all.map((x) => x.id));
+        serialport_1.SerialPort.list().then(function (value) {
+            value.find((p) => {
+                // The pid and vid returned by SerialPortCtrl start with 0x prefix in Mac, but no 0x prefix in Win32.
+                // Should compare with decimal value to keep compatibility.
+                if (p.productId && p.vendorId) {
+                    console.log("value");
+                    console.log(value);
+                    console.log(parseInt(p.productId, 16) === valueOfPid &&
+                        parseInt(p.vendorId, 16) === valueOfVid);
+                }
+                //return false;
+            });
+        });
         this._storage = storage;
         // constructor(context: ExtensionContext) {
         let com = this._storage.get("com");
@@ -213,6 +231,8 @@ class SerialProvider {
                         Name: p.Name,
                         Caption: p.Caption,
                         Usernamed: p.Usernamed,
+                        vendorId: p.vendorId,
+                        productId: p.productId,
                     });
                 }
             }
@@ -223,6 +243,8 @@ class SerialProvider {
                     Name: p.Name,
                     Caption: p.Caption,
                     Usernamed: p.Usernamed,
+                    vendorId: p.vendorId,
+                    productId: p.productId,
                 });
             }
             return result;
@@ -354,6 +376,8 @@ class SerialProvider {
                 Name: port.friendlyName ?? port.manufacturer,
                 DeviceID: port.pnpId,
                 Usernamed: undefined,
+                vendorId: port.vendorId,
+                productId: port.productId,
                 // productId: port.productId,
             };
         });

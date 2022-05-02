@@ -11,7 +11,7 @@
   ],
   "activationEvents": [
     "workspaceContains:**/*.ino",
-    "onCommand:serialdevices.helloWorld",
+    "onCommand:serialdevices.getsomedevices",
     "onView:SerialDeviceProviderService"
   ],
   "main": "./out/extension.js",
@@ -22,23 +22,23 @@
         "title": "Hello World"
       },
       {
-        "command": "serialdevices.getsome",
-        "title": "Hello Serial"
+        "command": "serialdevices.getsomedevices",
+        "title": "Refresh Devices"
       },
       {
         "command": "serialdevices.refreshEntry",
-        "title": "Hello Refresh",
+        "title": "Scan for changes.",
         "icon": {
           "light": "./resources/refresh.svg",
           "dark": "./resources/refresh.svg"
         }
       },
       {
-        "command": "serialdevices.editEntry",
-        "title": "Edit",
+        "command": "serialdevices.arduino_sp",
+        "title": "Show Arduino Serial Selection",
         "icon": {
-          "light": "./resources/refresh.svg",
-          "dark": "./resources/refresh.svg"
+          "light": "./resources/ino_16X.svg",
+          "dark": "./resources/ino_16X.svg"
         }
       },
       {
@@ -60,7 +60,7 @@
       ],
       "view/item/context": [
         {
-          "command": "serialdevices.editEntry",
+          "command": "serialdevices.arduino_sp",
           "when": "view == SerialDeviceProviderService",
           "group": "inline"
         },
