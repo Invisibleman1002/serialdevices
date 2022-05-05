@@ -1,7 +1,13 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 //import * as vscode from 'vscode';
-import { ExtensionContext, window, commands, TreeItem } from "vscode";
+import {
+  ExtensionContext,
+  window,
+  commands,
+  TreeItem,
+  ConfigurationTarget,
+} from "vscode";
 import { SerialProvider, SerialD } from "./serialDeviceprovider";
 
 // this method is called when your extension is activated
@@ -18,12 +24,16 @@ export function activate(context: ExtensionContext) {
     "serialdevices.DevicesSerial",
     serProvider.onFileClicked
   );
-  commands.registerCommand(
-    "serialdevices.getsomedevices",
-    serProvider.getdevices
+  context.subscriptions.push(
+    commands.registerCommand(
+      "serialdevices.getsomedevices",
+      serProvider.getdevices
+    )
   );
-  commands.registerCommand("serialdevices.refreshEntry", () =>
-    serProvider.dorefresh()
+  context.subscriptions.push(
+    commands.registerCommand("serialdevices.refreshEntry", () =>
+      serProvider.dorefresh()
+    )
   );
 
   // ! this wont work!  I mean, it pops open the Serial Port Selection but wont select it.
@@ -56,14 +66,20 @@ export function activate(context: ExtensionContext) {
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with registerCommand
   // The commandId parameter must match the command field in package.json
-  let disposable = commands.registerCommand("serialdevices.helloWorld", () => {
-    // The code you place here will be executed every time your command is executed
-    // Display a message box to the user
-    window.showInformationMessage("Hello World from SerialDevices!");
-  });
+  // let disposable = commands.registerCommand("serialdevices.helloWorld", () => {
+  //   // The code you place here will be executed every time your command is executed
+  //   // Display a message box to the user
+  //   window.showInformationMessage("Hello World from SerialDevices!");
+  // });
 
-  context.subscriptions.push(disposable);
+  // context.subscriptions.push(disposable);
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate(context: ExtensionContext) {
+  /* This does not work!  Extension can be disabled or uninstalled with out a question.
+  I would like to clean up the "database".  Anyone?
+  const serProvider = new SerialProvider(context.globalState);
+  serProvider.deactivate();
+  */
+}

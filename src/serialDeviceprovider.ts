@@ -8,11 +8,12 @@ import {
   Command,
   window,
   Memento,
-  extensions,
 } from "vscode";
 import { join } from "path";
-import { spawn } from "child_process";
+//import { spawn } from "child_process";
 import { SerialPort } from "serialport";
+//import { bonjour } from "bonjour";
+const bonjour = require("bonjour")();
 
 export class SerialProvider implements TreeDataProvider<SerialD> {
   private _onDidChangeTreeData: EventEmitter<any | undefined | null | void> =
@@ -35,7 +36,7 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
       console.log("value");
       console.log(value);
     });
-    const valueOfVid = parseInt("0403", 16);
+    /*     const valueOfVid = parseInt("0403", 16);
     const valueOfPid = parseInt("6001", 16);
     // console.log(extensions.all.map((x) => x.id));
     SerialPort.list().then(function (value) {
@@ -52,7 +53,18 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
         }
         //return false;
       });
+    }); */
+
+    // var browser = bonjour.find({ port: 8266 }, this.newService); //var browser = bonjour.find({ type: "_arduino._tcp." }, this.newService); //
+    var browser = bonjour.find(
+      { host: "tcp", type: "arduino" },
+      this.newService
+    );
+    browser.on("down", function (s: any) {
+      console.log(s);
+      console.log("down");
     });
+    //////^^^9^^    ALL TEST CODE
     this._storage = storage;
     // constructor(context: ExtensionContext) {
     let com: Com[] | undefined = this._storage.get<Com[]>("com");
@@ -65,6 +77,12 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
       this._RenamedDevices = com!;
     }
     //this._coms = this._storage.get("com");
+  }
+
+  newService(service: any) {
+    console.log("service");
+    console.log(service.type);
+    console.log(service);
   }
   //readonly onDidChangeTreeData: vscode.Event<Dependency | undefined | null | void> = this._onDidChangeTreeData.event;
   getTreeItem(element: SerialD): TreeItem {
@@ -109,7 +127,24 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
       console.error(error);
     }
   }
-
+  /*
+//This does not work when we deactivate.  What am I missing?
+  deactivate = async () => {
+    await window
+      .showWarningMessage(
+        "Would you like to Delete the 'Renamed' settings?",
+        "Yes",
+        "No"
+      )
+      .then((selection) => {
+        console.log(selection);
+        if (selection === "Yes") {
+          console.log("storage cleared");
+          this._storage.update("com", undefined);
+        }
+      });
+  };
+*/
   removename = async (item: SerialD) => {
     this._RenamedDevices = this._RenamedDevices.filter(
       (element) => element.DeviceID !== item.jsondata.DeviceID
@@ -443,7 +478,7 @@ https://stackoverflow.com/questions/42464838/what-is-the-most-efficient-way-to-d
       };
     });
   }
-
+  /*
   async I_made_this_mySerialD() {
     var serialJSON = "";
     //	await context.globalstate.get('trey');
@@ -489,6 +524,7 @@ https://stackoverflow.com/questions/42464838/what-is-the-most-efficient-way-to-d
     // return result;
     //return promise;
   }
+  */
 } //End CLass
 
 class Com {

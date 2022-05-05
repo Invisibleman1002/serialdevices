@@ -15,8 +15,8 @@ function activate(context) {
     const serProvider = new serialDeviceprovider_1.SerialProvider(context.globalState);
     vscode_1.window.registerTreeDataProvider("SerialDeviceProviderService", serProvider);
     vscode_1.commands.registerCommand("serialdevices.DevicesSerial", serProvider.onFileClicked);
-    vscode_1.commands.registerCommand("serialdevices.getsomedevices", serProvider.getdevices);
-    vscode_1.commands.registerCommand("serialdevices.refreshEntry", () => serProvider.dorefresh());
+    context.subscriptions.push(vscode_1.commands.registerCommand("serialdevices.getsomedevices", serProvider.getdevices));
+    context.subscriptions.push(vscode_1.commands.registerCommand("serialdevices.refreshEntry", () => serProvider.dorefresh()));
     // ! this wont work!  I mean, it pops open the Serial Port Selection but wont select it.
     vscode_1.commands.registerCommand("serialdevices.arduino_sp", (node) => {
         // const valueOfVid = parseInt("0403", 16);
@@ -38,15 +38,18 @@ function activate(context) {
     // The command has been defined in the package.json file
     // Now provide the implementation of the command with registerCommand
     // The commandId parameter must match the command field in package.json
-    let disposable = vscode_1.commands.registerCommand("serialdevices.helloWorld", () => {
-        // The code you place here will be executed every time your command is executed
-        // Display a message box to the user
-        vscode_1.window.showInformationMessage("Hello World from SerialDevices!");
-    });
-    context.subscriptions.push(disposable);
+    // let disposable = commands.registerCommand("serialdevices.helloWorld", () => {
+    //   // The code you place here will be executed every time your command is executed
+    //   // Display a message box to the user
+    //   window.showInformationMessage("Hello World from SerialDevices!");
+    // });
+    // context.subscriptions.push(disposable);
 }
 exports.activate = activate;
 // this method is called when your extension is deactivated
-function deactivate() { }
+function deactivate(context) {
+    const serProvider = new serialDeviceprovider_1.SerialProvider(context.globalState);
+    serProvider.deactivate();
+}
 exports.deactivate = deactivate;
 //# sourceMappingURL=extension.js.map

@@ -4,8 +4,10 @@ exports.SerialD = exports.SerialProvider = void 0;
 /* eslint-disable @typescript-eslint/naming-convention */
 const vscode_1 = require("vscode");
 const path_1 = require("path");
-const child_process_1 = require("child_process");
+//import { spawn } from "child_process";
 const serialport_1 = require("serialport");
+//import { bonjour } from "bonjour";
+const bonjour = require("bonjour")();
 class SerialProvider {
     //private _devices: string[][] = [];
     //   private _devices: object = {};
@@ -18,6 +20,17 @@ class SerialProvider {
         this._refresh = true;
         this._coms = [];
         this._comChanged = [];
+        this.deactivate = async () => {
+            await vscode_1.window
+                .showWarningMessage("Would you like to Delete the 'Renamed' settings?", "Yes", "No")
+                .then((selection) => {
+                console.log(selection);
+                if (selection === "Yes") {
+                    console.log("storage cleared");
+                    this._storage.update("com", undefined);
+                }
+            });
+        };
         this.removename = async (item) => {
             this._RenamedDevices = this._RenamedDevices.filter((element) => element.DeviceID !== item.jsondata.DeviceID);
             this._storage.update("com", this._RenamedDevices);
@@ -147,22 +160,31 @@ class SerialProvider {
             console.log("value");
             console.log(value);
         });
-        const valueOfVid = parseInt("0403", 16);
+        /*     const valueOfVid = parseInt("0403", 16);
         const valueOfPid = parseInt("6001", 16);
         // console.log(extensions.all.map((x) => x.id));
-        serialport_1.SerialPort.list().then(function (value) {
-            value.find((p) => {
-                // The pid and vid returned by SerialPortCtrl start with 0x prefix in Mac, but no 0x prefix in Win32.
-                // Should compare with decimal value to keep compatibility.
-                if (p.productId && p.vendorId) {
-                    console.log("value");
-                    console.log(value);
-                    console.log(parseInt(p.productId, 16) === valueOfPid &&
-                        parseInt(p.vendorId, 16) === valueOfVid);
-                }
-                //return false;
-            });
+        SerialPort.list().then(function (value) {
+          value.find((p) => {
+            // The pid and vid returned by SerialPortCtrl start with 0x prefix in Mac, but no 0x prefix in Win32.
+            // Should compare with decimal value to keep compatibility.
+            if (p.productId && p.vendorId) {
+              console.log("value");
+              console.log(value);
+              console.log(
+                parseInt(p.productId, 16) === valueOfPid &&
+                  parseInt(p.vendorId, 16) === valueOfVid
+              );
+            }
+            //return false;
+          });
+        }); */
+        // var browser = bonjour.find({ port: 8266 }, this.newService); //var browser = bonjour.find({ type: "_arduino._tcp." }, this.newService); //
+        var browser = bonjour.find({ host: "tcp", type: "arduino" }, this.newService);
+        browser.on("down", function (s) {
+            console.log(s);
+            console.log("down");
         });
+        //////^^^9^^    ALL TEST CODE
         this._storage = storage;
         // constructor(context: ExtensionContext) {
         let com = this._storage.get("com");
@@ -175,6 +197,11 @@ class SerialProvider {
             this._RenamedDevices = com;
         }
         //this._coms = this._storage.get("com");
+    }
+    newService(service) {
+        console.log("service");
+        console.log(service.type);
+        console.log(service);
     }
     //readonly onDidChangeTreeData: vscode.Event<Dependency | undefined | null | void> = this._onDidChangeTreeData.event;
     getTreeItem(element) {
@@ -381,45 +408,6 @@ class SerialProvider {
                 // productId: port.productId,
             };
         });
-    }
-    async I_made_this_mySerialD() {
-        var serialJSON = "";
-        //	await context.globalstate.get('trey');
-        return new Promise((resolve, reject) => {
-            //let promise =  new Promise((resolve, reject) => {
-            //	const spawnTest = (() => {
-            const dir = (0, child_process_1.spawn)("SerialDevices.exe", {
-                stdio: ["ignore", "pipe", "pipe"],
-                cwd: "C:\\Users\\treya\\source\\repos\\SerialDevices\\bin\\Debug\\net5.0\\",
-            });
-            dir.stdout.on("data", (data) => {
-                // console.log(`spawn stdout: ${data}`);
-                serialJSON += data;
-            });
-            dir.stderr.on("data", (data) => {
-                console.log(`spawn stderr: ${data}`);
-            });
-            dir.on("error", (code) => {
-                console.log(`spawn error: ${code}`);
-            });
-            //https://stackoverflow.com/questions/37522010/difference-between-childprocess-close-exit-events
-            dir.on("close", (code) => {
-                // console.log(`spawn child process closed with code ${code}`);
-                const obj = JSON.parse(serialJSON);
-                //console.log(obj);
-                //console.log(obj[0].Name);
-                // _devices = obj;
-                resolve(obj);
-            });
-            dir.on("exit", (code) => {
-                //console.log(`spawn child process exited with code ${code}`);
-            });
-        });
-        //	console.log("---result--S-");
-        //console.log(result[0].Name);
-        // let result = await promise;
-        // return result;
-        //return promise;
     }
 } //End CLass
 exports.SerialProvider = SerialProvider;

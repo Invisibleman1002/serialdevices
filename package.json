@@ -1,13 +1,27 @@
 {
   "name": "serialdevices",
-  "displayName": "SerialDevices",
-  "description": "Scan for Serial Devices",
-  "version": "0.0.1",
+  "displayName": "Serial Devices",
+  "description": "Scan for Serial Devices. Newly added over the air!",
+  "icon": "images/SerialScanner.png",
+  "publisher": "TreyAughenbaugh",
+  "version": "0.1.1",
   "engines": {
     "vscode": "^1.66.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Invisibleman1002/serialdevices.git"
+  },
   "categories": [
     "Other"
+  ],
+  "keywords": [
+    "arduino",
+    "microcontroller",
+    "serial",
+    "usb",
+    "ota",
+    "over the air"
   ],
   "activationEvents": [
     "workspaceContains:**/*.ino",
@@ -17,10 +31,6 @@
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
-      {
-        "command": "serialdevices.helloWorld",
-        "title": "Hello World"
-      },
       {
         "command": "serialdevices.getsomedevices",
         "title": "Refresh Devices"
@@ -102,6 +112,7 @@
     "@vscode/test-electron": "^2.1.2"
   },
   "dependencies": {
+    "bonjour": "^3.5.0",
     "serialport": "^10.4.0"
   }
 }
