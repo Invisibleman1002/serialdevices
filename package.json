@@ -99,6 +99,8 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
+    "@types/bonjour": "^3.5.5",
+    "@types/mdns": "0.0.33",
     "@types/vscode": "^1.66.0",
     "@types/glob": "^7.2.0",
     "@types/mocha": "^9.1.0",
@@ -113,6 +115,7 @@
   },
   "dependencies": {
     "bonjour": "^3.5.0",
+    "bonjour-service": "^1.0.12",
     "serialport": "^10.4.0"
   }
 }

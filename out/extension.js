@@ -48,8 +48,11 @@ function activate(context) {
 exports.activate = activate;
 // this method is called when your extension is deactivated
 function deactivate(context) {
-    const serProvider = new serialDeviceprovider_1.SerialProvider(context.globalState);
+    /* This does not work!  Extension can be disabled or uninstalled with out a question.
+    I would like to clean up the "database".  Anyone?
+    const serProvider = new SerialProvider(context.globalState);
     serProvider.deactivate();
+    */
 }
 exports.deactivate = deactivate;
 //# sourceMappingURL=extension.js.map

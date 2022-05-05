@@ -6,12 +6,41 @@ const vscode_1 = require("vscode");
 const path_1 = require("path");
 //import { spawn } from "child_process";
 const serialport_1 = require("serialport");
+//import { Server } from "http";
 //import { bonjour } from "bonjour";
-const bonjour = require("bonjour")();
+//import bonjour = require('bonjour')();
+//const bonjour = require("bonjour")();
+//import _bonjour from "bonjour";
+//const bonjour = _bonjour();
+const bonjour_service_1 = require("bonjour-service");
+//import bonjour = require("bonjour");
+//const bonjour = new _bonjour();
 class SerialProvider {
     //private _devices: string[][] = [];
     //   private _devices: object = {};
     constructor(storage) {
+        // SerialPort.list().then(function (value) {
+        //   console.log("value");
+        //   console.log(value);
+        // });
+        /*     const valueOfVid = parseInt("0403", 16);
+        const valueOfPid = parseInt("6001", 16);
+        // console.log(extensions.all.map((x) => x.id));
+        SerialPort.list().then(function (value) {
+          value.find((p) => {
+            // The pid and vid returned by SerialPortCtrl start with 0x prefix in Mac, but no 0x prefix in Win32.
+            // Should compare with decimal value to keep compatibility.
+            if (p.productId && p.vendorId) {
+              console.log("value");
+              console.log(value);
+              console.log(
+                parseInt(p.productId, 16) === valueOfPid &&
+                  parseInt(p.vendorId, 16) === valueOfVid
+              );
+            }
+            //return false;
+          });
+        }); */
         this._onDidChangeTreeData = new vscode_1.EventEmitter();
         //private _onDidChangeTreeData: EventEmitter<Dependency | undefined | null | void> = new vscode.EventEmitter<Dependency | undefined | null | void>();
         this.onDidChangeTreeData = this._onDidChangeTreeData.event;
@@ -20,23 +49,34 @@ class SerialProvider {
         this._refresh = true;
         this._coms = [];
         this._comChanged = [];
-        this.deactivate = async () => {
-            await vscode_1.window
-                .showWarningMessage("Would you like to Delete the 'Renamed' settings?", "Yes", "No")
-                .then((selection) => {
-                console.log(selection);
-                if (selection === "Yes") {
-                    console.log("storage cleared");
-                    this._storage.update("com", undefined);
-                }
+        this._OTA = [];
+        this._svc = [];
+        this._bonjour = new bonjour_service_1.default();
+        /*
+      //This does not work when we deactivate.  What am I missing?
+        deactivate = async () => {
+          await window
+            .showWarningMessage(
+              "Would you like to Delete the 'Renamed' settings?",
+              "Yes",
+              "No"
+            )
+            .then((selection) => {
+              console.log(selection);
+              if (selection === "Yes") {
+                console.log("storage cleared");
+                this._storage.update("com", undefined);
+              }
             });
         };
+      */
         this.removename = async (item) => {
             this._RenamedDevices = this._RenamedDevices.filter((element) => element.DeviceID !== item.jsondata.DeviceID);
             this._storage.update("com", this._RenamedDevices);
             this.refresh();
         };
         this.tryrename = async (item) => {
+            console.log(this._svc);
             //  tryrename = async (item:string)=>{//
             let data = await vscode_1.window.showInputBox({
                 prompt: `Rename ${item.jsondata.Caption} to:`,
@@ -156,34 +196,6 @@ class SerialProvider {
             //this._coms.sort((a: any, b: any) => a.Caption - b.Caption);
             this.refresh();
         };
-        serialport_1.SerialPort.list().then(function (value) {
-            console.log("value");
-            console.log(value);
-        });
-        /*     const valueOfVid = parseInt("0403", 16);
-        const valueOfPid = parseInt("6001", 16);
-        // console.log(extensions.all.map((x) => x.id));
-        SerialPort.list().then(function (value) {
-          value.find((p) => {
-            // The pid and vid returned by SerialPortCtrl start with 0x prefix in Mac, but no 0x prefix in Win32.
-            // Should compare with decimal value to keep compatibility.
-            if (p.productId && p.vendorId) {
-              console.log("value");
-              console.log(value);
-              console.log(
-                parseInt(p.productId, 16) === valueOfPid &&
-                  parseInt(p.vendorId, 16) === valueOfVid
-              );
-            }
-            //return false;
-          });
-        }); */
-        // var browser = bonjour.find({ port: 8266 }, this.newService); //var browser = bonjour.find({ type: "_arduino._tcp." }, this.newService); //
-        var browser = bonjour.find({ host: "tcp", type: "arduino" }, this.newService);
-        browser.on("down", function (s) {
-            console.log(s);
-            console.log("down");
-        });
         //////^^^9^^    ALL TEST CODE
         this._storage = storage;
         // constructor(context: ExtensionContext) {
@@ -196,14 +208,216 @@ class SerialProvider {
             // console.log("com");
             this._RenamedDevices = com;
         }
-        //this._coms = this._storage.get("com");
+        this.mDNS_start();
+        // var browser = bonjour.find({ port: 8266 }, this.newService); //var browser = bonjour.find({ type: "_arduino._tcp." }, this.newService); //
+        /*     var browser = bonjour.find({ type: "arduino" }); //,
+    
+        let myatt: any[] = [];
+        let eota: Com[] = [];
+        // browser.on("up", this.newService);
+    
+        browser.on("up", function (service: any) {
+          console.log("service");
+    
+          console.log(service);
+          console.log(service.txt.board);
+    
+          myatt.push(service);
+    
+          let lent = eota.push({
+            Name: "FIRE",
+            Caption: "TRUCK",
+            DeviceID: "TRUCK",
+            Usernamed: "",
+            vendorId: "undefined",
+            productId: "undefined",
+          });
+          console.log(myatt);
+          console.log(lent);
+          //this.refresh();
+        }); */
+        // browser.on("down", function (s: any) {
+        //   console.log(s);
+        //   console.log("down");
+        // });
+    }
+    async find(token) {
+        console.log("inside find:");
+        const services = [];
+        const bonjour = new bonjour_service_1.default();
+        const browser = bonjour.find({ type: "arduino", protocol: "tcp" }, function (service) {
+            services.push({
+                label: service.name,
+                service,
+            });
+        });
+        await vscode_1.window.withProgress({
+            location: vscode_1.ProgressLocation.Notification,
+            title: "Discovered",
+            cancellable: true,
+        }, (progress, token) => {
+            const step = 100 / 10;
+            const nobodyMsg = "nobody 😢";
+            progress.report({
+                increment: 0,
+                message: nobodyMsg,
+            });
+            return new Promise((resolve) => {
+                let elapsed = 0;
+                const interval = setInterval(() => {
+                    elapsed++;
+                    const names = services.map((s) => s.label).join(", ");
+                    const message = names || nobodyMsg;
+                    progress.report({
+                        increment: step,
+                        message: message,
+                    });
+                    if (elapsed === 10) {
+                        clearInterval(interval);
+                        resolve("resolve");
+                    }
+                }, 1000);
+                token.onCancellationRequested(() => {
+                    clearInterval(interval);
+                    resolve("resolve");
+                });
+            });
+        });
+        browser.stop();
+        return services;
+    }
+    async mDNS_start() {
+        //  bonjour.find({ type: "arduino" }, this.newService);
+        /*     const tokenSrc = new CancellationTokenSource();
+        const services = await this.find(tokenSrc.token);
+    
+        if (services.length === 0) {
+          window.showErrorMessage("There's no peer found");
+          return;
+        }
+    
+        const selected = await window.showQuickPick<item>(services);
+        if (!selected) {
+          return;
+        }
+        console.log(selected.service); */
+        /*     let eota: OTAPlus;
+        eota = {
+          Name: selected.service.name,
+          Caption: selected.service.host,
+          DeviceID: selected.service.addresses[0],
+          Usernamed: "",
+          vendorId: "undefined",
+          productId: "undefined",
+          address: selected.service.addresses[0],
+          //name: string = "";
+          fqdn: selected.service.fqdn,
+          host: selected.service.host,
+          port: selected.service.port,
+          auth_upload: selected.service.txt.auth_upload,
+          board: selected.service.txt.board,
+        };
+        console.log(this._OTA.push(eota));
+        this.refresh(); */
+        console.log("starting FIND!");
+        this._bonjour.find({ type: "arduino" }, this.newService.bind(this));
+        /*  this._bonjour.find({ type: "arduino" }, (service) => {
+          console.log("newService service");
+          //  console.log(service.type);
+          console.log(service);
+          console.log(service.txt.board);
+     
+          let eota: OTAPlus;
+          eota = {
+            Name: service.name,
+            Caption: service.host,
+            DeviceID: service.addresses![0],
+            Usernamed: "",
+            vendorId: "undefined",
+            productId: "undefined",
+            address: service.addresses![0],
+            //name: string = "";
+            fqdn: service.fqdn,
+            host: service.host,
+            port: service.port,
+            auth_upload: service.txt.auth_upload,
+            board: service.txt.board,
+          };
+         
+          console.log("eota");
+          console.log(eota);
+          //  this.wtf(eota);
+          this._OTA.push(eota);
+          console.log("FARGING ICEHOLE:");
+          console.log(this._OTA);
+          this.refresh();
+        }); */
     }
     newService(service) {
-        console.log("service");
-        console.log(service.type);
+        console.log("newService service");
+        //  console.log(service.type);
         console.log(service);
+        console.log(service.txt.board);
+        // let otacom:Com = new Com(){
+        //   Name: service.name,
+        //   Caption: item.jsondata.Caption,
+        //   DeviceID: item.jsondata.DeviceID,
+        //   Usernamed: undefined,
+        //   vendorId: item.jsondata.vendorId,
+        //   productId: item.jsondata.productId,
+        // };
+        //---------------------------------------------  REVISIT THIS!  might have to do on multiple
+        //this._OTA = this._OTA.filter((element) => element.fqdn !== service.fqdn);
+        let eota;
+        eota = {
+            Name: service.name,
+            Caption: service.host,
+            DeviceID: service.addresses[0],
+            Usernamed: "",
+            vendorId: "undefined",
+            productId: "undefined",
+            address: service.addresses[0],
+            //name: string = "";
+            fqdn: service.fqdn,
+            host: service.host,
+            port: service.port,
+            auth_upload: service.txt.auth_upload,
+            board: service.txt.board,
+        };
+        //this._svc.push(service);
+        // let eota: Com[] = [];
+        // console.log("TRUCK");
+        // let lent = eota.push({
+        //   Name: "FIRE",
+        //   Caption: "TRUCK",
+        //   DeviceID: "TRUCK",
+        //   Usernamed: "",
+        //   vendorId: "undefined",
+        //   productId: "undefined",
+        // });
+        // this._OTA.push(eota);
+        console.log("eota");
+        console.log(eota);
+        //  this.wtf(eota);
+        this._OTA.push(eota);
+        console.log("FARGING ICEHOLE:");
+        console.log(this._OTA);
+        this.refresh();
     }
-    //readonly onDidChangeTreeData: vscode.Event<Dependency | undefined | null | void> = this._onDidChangeTreeData.event;
+    // class OTAPlus extends Com {
+    //   address: string = "";
+    //   //name: string = "";
+    //   fqdn: string = "";
+    //   host: string = "";
+    //   port: number = 0;
+    //   auth_upload: string = "";
+    //   board: string = "";
+    // }
+    wtf(datain) {
+        console.log("datain");
+        console.log(datain);
+        console.log(this._OTA.push(datain));
+    }
     getTreeItem(element) {
         // let renamed: Com[] = this._RenamedDevices.filter(
         //   (element) => element.DeviceID === element.DeviceID
@@ -305,8 +519,17 @@ class SerialProvider {
         this._onDidChangeTreeData.fire(undefined);
     }
     dorefresh() {
-        vscode_1.window.showInformationMessage("Scanning for Serial port changes.");
+        // window.showInformationMessage("Scanning for Serial port changes.");
         this._timerObject = setInterval(this.getdevices, 800);
+        vscode_1.window
+            .showInformationMessage("Scanning for Serial port changes.", "Cancel")
+            .then((selection) => {
+            console.log(selection);
+            if (selection === "Cancel") {
+                console.log("Cancel Cancel");
+                clearInterval(this._timerObject);
+            }
+        });
     }
     async getChildren(element) {
         // console.log("---getChildren-------------");
@@ -388,6 +611,39 @@ class SerialProvider {
                 this._comChanged = [];
             }
             //this.dorefresh();
+            if (this._OTA.length !== 0) {
+                const plus = treeSerialD.length;
+                for (var i = 0; i < this._OTA.length; i++) {
+                    let renamed = this._RenamedDevices.filter((element) => element.DeviceID === this._OTA[i].DeviceID);
+                    let cption = this._OTA[i].Caption;
+                    if (renamed.length > 0) {
+                        cption =
+                            renamed[0].Usernamed !== undefined
+                                ? renamed[0].Usernamed
+                                : this._OTA[i].Caption;
+                    }
+                    /*
+                    switch (this._comChanged[i].event) {
+                      case "added":
+                        cption = `+${cption}+`;
+                        break;
+                      case "removed":
+                        cption = `-${cption}-`;
+                        break;
+                    }
+                    */
+                    console.log(cption);
+                    treeSerialD[i + plus] = new SerialD(cption, vscode_1.TreeItemCollapsibleState.None, {
+                        command: "",
+                        title: this._OTA[i].Caption,
+                        tooltip: `DeviceID:  ${this._OTA[i].DeviceID}`,
+                    }, "com", this._OTA[i]);
+                    treeSerialD[i + plus].command.arguments = [treeSerialD[i + plus]];
+                    treeSerialD[i + plus].id = i + plus.toString();
+                    // treeSerialD[i + plus].description = this._OTA[i].address; // this._comChanged[i].Caption;
+                    treeSerialD[i + plus].tooltip = `Click to Rename.`;
+                }
+            }
             //setTimeout(this.getdevices, 500);//wait 2 seconds
             return treeSerialD;
         }
@@ -422,6 +678,18 @@ class ComPlus extends Com {
     constructor() {
         super(...arguments);
         this.event = "";
+    }
+}
+class OTAPlus extends Com {
+    constructor() {
+        super(...arguments);
+        this.address = "";
+        //name: string = "";
+        this.fqdn = "";
+        this.host = "";
+        this.port = 0;
+        this.auth_upload = "";
+        this.board = "";
     }
 }
 class SerialD extends vscode_1.TreeItem {
