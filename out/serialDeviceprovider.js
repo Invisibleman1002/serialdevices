@@ -45,12 +45,12 @@ class SerialProvider {
         //private _onDidChangeTreeData: EventEmitter<Dependency | undefined | null | void> = new vscode.EventEmitter<Dependency | undefined | null | void>();
         this.onDidChangeTreeData = this._onDidChangeTreeData.event;
         this._refreshcount = 0;
+        this._refreshOTA = 0; //Clear the OTA every x cycles.
         this._RenamedDevices = [];
         this._refresh = true;
         this._coms = [];
         this._comChanged = [];
         this._OTA = [];
-        this._svc = [];
         this._bonjour = new bonjour_service_1.default();
         /*
       //This does not work when we deactivate.  What am I missing?
@@ -76,7 +76,6 @@ class SerialProvider {
             this.refresh();
         };
         this.tryrename = async (item) => {
-            console.log(this._svc);
             //  tryrename = async (item:string)=>{//
             let data = await vscode_1.window.showInputBox({
                 prompt: `Rename ${item.jsondata.Caption} to:`,
@@ -135,6 +134,12 @@ class SerialProvider {
                 this.refresh();
             }
         };
+        this.setclipboard = async (node) => {
+            let txt = `${node.label} : ${node.description}`;
+            console.log(txt);
+            await vscode_1.env.clipboard.writeText(txt);
+            vscode_1.commands.executeCommand("arduino.selectSerialPort");
+        };
         this.getdevices = async () => {
             let oldcomcount = this._coms.length;
             //  console.log("oldcomcount");
@@ -143,6 +148,8 @@ class SerialProvider {
             this._coms = await this.mySerialD().then(function (value) {
                 return value;
             });
+            this._coms.sort((a, b) => a.Caption.localeCompare(b.Caption, "en", { numeric: true }));
+            //const sortAlphaNum = (a, b) => a.localeCompare(b, 'en', { numeric: true })
             // console.log("this._coms.length");
             // console.log(this._coms.length);
             if (oldcomcount === 0) {
@@ -242,7 +249,7 @@ class SerialProvider {
         // });
     }
     async find(token) {
-        console.log("inside find:");
+        // console.log("inside find:");
         const services = [];
         const bonjour = new bonjour_service_1.default();
         const browser = bonjour.find({ type: "arduino", protocol: "tcp" }, function (service) {
@@ -286,7 +293,13 @@ class SerialProvider {
         browser.stop();
         return services;
     }
-    async mDNS_start() {
+    clickedmdns_restart() {
+        // console.log("button _refreshOTA!");
+        this._refreshOTA = 6;
+        this._OTA = []; //Lets clear our old devices hanging around every once in a while.  You unplugged, right?
+        this.mDNS_start();
+    }
+    mDNS_start() {
         //  bonjour.find({ type: "arduino" }, this.newService);
         /*     const tokenSrc = new CancellationTokenSource();
         const services = await this.find(tokenSrc.token);
@@ -301,26 +314,31 @@ class SerialProvider {
           return;
         }
         console.log(selected.service); */
-        /*     let eota: OTAPlus;
-        eota = {
-          Name: selected.service.name,
-          Caption: selected.service.host,
-          DeviceID: selected.service.addresses[0],
-          Usernamed: "",
-          vendorId: "undefined",
-          productId: "undefined",
-          address: selected.service.addresses[0],
-          //name: string = "";
-          fqdn: selected.service.fqdn,
-          host: selected.service.host,
-          port: selected.service.port,
-          auth_upload: selected.service.txt.auth_upload,
-          board: selected.service.txt.board,
-        };
-        console.log(this._OTA.push(eota));
-        this.refresh(); */
-        console.log("starting FIND!");
-        this._bonjour.find({ type: "arduino" }, this.newService.bind(this));
+        // console.log("starting FIND!");
+        //Here so other things can start this and we dont end up with holes?
+        clearInterval(this._timerBonjour);
+        this._refreshOTA = this._refreshOTA + 1;
+        if (this._refreshOTA > 5) {
+            // console.log("starting _refreshOTA!");
+            this._refreshOTA = 0;
+            this._OTA = []; //Lets clear our old devices hanging around every once in a while.  You unplugged, right?
+        }
+        let browser = this._bonjour.find({ type: "arduino" }, this.newService.bind(this));
+        //console.log(browser);
+        this._timerBonjour = setInterval(() => {
+            clearInterval(this._timerBonjour);
+            //  console.log("browser");
+            //  console.log(browser);
+            browser.stop();
+            this.mDNS_start();
+        }, 60000);
+        //RARE anything says its down.  all my OTA just disappear because unplugged.
+        // down.on("down", (service) => {
+        //   console.log("DOWN DOWN");
+        //   console.log(service);
+        //   console.log(service.txt.board);
+        // });
+        //THIS BIT ME!!!!  https://stackoverflow.com/questions/20279484/how-to-access-the-correct-this-inside-a-callback
         /*  this._bonjour.find({ type: "arduino" }, (service) => {
           console.log("newService service");
           //  console.log(service.type);
@@ -354,10 +372,10 @@ class SerialProvider {
         }); */
     }
     newService(service) {
-        console.log("newService service");
+        // console.log("newService service");
         //  console.log(service.type);
-        console.log(service);
-        console.log(service.txt.board);
+        //  console.log(service);
+        //  console.log(service.txt.board);
         // let otacom:Com = new Com(){
         //   Name: service.name,
         //   Caption: item.jsondata.Caption,
@@ -384,39 +402,15 @@ class SerialProvider {
             auth_upload: service.txt.auth_upload,
             board: service.txt.board,
         };
-        //this._svc.push(service);
-        // let eota: Com[] = [];
-        // console.log("TRUCK");
-        // let lent = eota.push({
-        //   Name: "FIRE",
-        //   Caption: "TRUCK",
-        //   DeviceID: "TRUCK",
-        //   Usernamed: "",
-        //   vendorId: "undefined",
-        //   productId: "undefined",
-        // });
-        // this._OTA.push(eota);
-        console.log("eota");
-        console.log(eota);
-        //  this.wtf(eota);
+        this._OTA = this._OTA.filter((element) => element.fqdn !== service.fqdn);
+        // this._OTA = this._OTA.filter(
+        //   (element) => element.DeviceID !== service.addresses[0]
+        // );
         this._OTA.push(eota);
-        console.log("FARGING ICEHOLE:");
-        console.log(this._OTA);
+        this._OTA.sort((a, b) => a.Name.localeCompare(b.Name));
+        //  console.log("FARGING ICEHOLE:");
+        //  console.log(this._OTA);
         this.refresh();
-    }
-    // class OTAPlus extends Com {
-    //   address: string = "";
-    //   //name: string = "";
-    //   fqdn: string = "";
-    //   host: string = "";
-    //   port: number = 0;
-    //   auth_upload: string = "";
-    //   board: string = "";
-    // }
-    wtf(datain) {
-        console.log("datain");
-        console.log(datain);
-        console.log(this._OTA.push(datain));
     }
     getTreeItem(element) {
         // let renamed: Com[] = this._RenamedDevices.filter(
@@ -547,6 +541,9 @@ class SerialProvider {
                 coms = await this.mySerialD().then(function (value) {
                     return value;
                 });
+                // coms.sort((a, b) =>
+                //   a.Caption.localeCompare(b.Caption, "en", { numeric: true })
+                // );
             }
             let treeSerialD = [];
             if (coms.length !== 0) {
@@ -573,6 +570,7 @@ class SerialProvider {
                     treeSerialD[i].description = coms[i].Name;
                     treeSerialD[i].tooltip = `Click to Rename. \n\n${coms[i].Caption}\n${coms[i].Name}`;
                 }
+                treeSerialD.sort((a, b) => a.label.localeCompare(b.label, "en", { numeric: true }));
             }
             //CHANGED CHILDREN!
             if (this._comChanged.length !== 0) {
@@ -597,7 +595,7 @@ class SerialProvider {
                         break;
                     }
                     */
-                    console.log(cption);
+                    // console.log(cption);
                     treeSerialD[i + plus] = new SerialD(cption, vscode_1.TreeItemCollapsibleState.None, {
                         command: "",
                         title: this._comChanged[i].Caption,
@@ -610,9 +608,27 @@ class SerialProvider {
                 }
                 this._comChanged = [];
             }
-            //this.dorefresh();
             if (this._OTA.length !== 0) {
-                const plus = treeSerialD.length;
+                let plus = treeSerialD.length;
+                let ni = 0;
+                //////
+                treeSerialD[ni + plus] = new SerialD("--= Network Devices =--", vscode_1.TreeItemCollapsibleState.None, {
+                    command: "serialdevices.restartmdns",
+                    title: "Network Devices",
+                    tooltip: `header`,
+                }, "blank", {
+                    Name: "",
+                    Caption: "",
+                    DeviceID: "",
+                    Usernamed: "",
+                    productId: "",
+                    vendorId: "",
+                });
+                treeSerialD[ni + plus].command.arguments = [treeSerialD[ni + plus]];
+                treeSerialD[ni + plus].id = ni + plus.toString();
+                treeSerialD[ni + plus].description = "";
+                treeSerialD[ni + plus].tooltip = `Click to Refresh OTA.`;
+                plus = treeSerialD.length;
                 for (var i = 0; i < this._OTA.length; i++) {
                     let renamed = this._RenamedDevices.filter((element) => element.DeviceID === this._OTA[i].DeviceID);
                     let cption = this._OTA[i].Caption;
@@ -632,16 +648,18 @@ class SerialProvider {
                         break;
                     }
                     */
-                    console.log(cption);
+                    //console.log(cption);
                     treeSerialD[i + plus] = new SerialD(cption, vscode_1.TreeItemCollapsibleState.None, {
-                        command: "",
+                        command: "serialdevices.renameEntry",
                         title: this._OTA[i].Caption,
                         tooltip: `DeviceID:  ${this._OTA[i].DeviceID}`,
-                    }, "com", this._OTA[i]);
+                    }, "wifi", this._OTA[i]);
                     treeSerialD[i + plus].command.arguments = [treeSerialD[i + plus]];
                     treeSerialD[i + plus].id = i + plus.toString();
-                    // treeSerialD[i + plus].description = this._OTA[i].address; // this._comChanged[i].Caption;
-                    treeSerialD[i + plus].tooltip = `Click to Rename.`;
+                    //https://code.visualstudio.com/api/references/vscode-api#MarkdownString
+                    treeSerialD[i + plus].description = this._OTA[i].address; // this._comChanged[i].Caption;
+                    treeSerialD[i + plus].tooltip = new vscode_1.MarkdownString(`# ${this._OTA[i].address}`); // `Click to Rename.`;
+                    //  console.log(treeSerialD[i + plus].iconPath);
                 }
             }
             //setTimeout(this.getdevices, 500);//wait 2 seconds

@@ -5,6 +5,8 @@ import {
   ExtensionContext,
   window,
   commands,
+  env,
+  Clipboard,
   TreeItem,
   ConfigurationTarget,
 } from "vscode";
@@ -41,10 +43,17 @@ export function activate(context: ExtensionContext) {
     // const valueOfVid = parseInt("0403", 16);
     // const valueOfPid = parseInt("6001", 16);
     //This doesnt work, yet...   Maybe there is a way to send the port to the Arduino VSC Ext.
-    if (node.jsondata.vendorId && node.jsondata.productId) {
+    if (node.type === "wifi") {
+      serProvider.setclipboard(node);
+    }
+    if (
+      node.jsondata.vendorId &&
+      node.jsondata.productId &&
+      node.type === "com"
+    ) {
       const valueOfVid = parseInt(node.jsondata.vendorId, 16);
       const valueOfPid = parseInt(node.jsondata.productId, 16);
-      console.log(valueOfPid);
+      // console.log(valueOfPid);
       commands.executeCommand(
         "arduino.selectSerialPort",
         valueOfVid,
@@ -60,6 +69,11 @@ export function activate(context: ExtensionContext) {
   commands.registerCommand("serialdevices.unrename", (item: SerialD) =>
     serProvider.removename(item)
   );
+
+  commands.registerCommand("serialdevices.restartmdns", () =>
+    serProvider.clickedmdns_restart()
+  );
+
   //see output
   //commands.registerCommand('serialdevices.renameEntry', (item:TreeItem)=> {console.log(item);});
   //commands.executeCommand('serialdevices.refresh', 'shouldRefresh', true);

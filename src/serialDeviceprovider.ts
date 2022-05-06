@@ -8,11 +8,14 @@ import {
   Command,
   window,
   Memento,
+  MarkdownString,
+  env,
+  commands,
   CancellationToken,
   CancellationTokenSource,
   ProgressLocation,
 } from "vscode";
-import { join } from "path";
+import { join, resolve } from "path";
 //import { spawn } from "child_process";
 import { SerialPort } from "serialport";
 //import { Server } from "http";
@@ -34,13 +37,14 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
     this._onDidChangeTreeData.event;
 
   private _timerObject: any;
+  private _timerBonjour: any; //All these give errors... NodeJS.Timeout=null;//null | ReturnType<typeof setInterval> = null ;
   private _refreshcount: number = 0;
+  private _refreshOTA: number = 0; //Clear the OTA every x cycles.
   private _RenamedDevices: Com[] = [];
   private _refresh: boolean = true;
   private _coms: Com[] = [];
   private _comChanged: ComPlus[] = [];
   private _OTA: OTAPlus[] = [];
-  private _svc: any[] = [];
   private _storage: Memento;
   private _bonjour: Bonjour = new _bonjour();
   //private _devices: string[][] = [];
@@ -117,7 +121,7 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
   }
 
   async find(token: CancellationToken): Promise<item[]> {
-    console.log("inside find:");
+    // console.log("inside find:");
     const services: item[] = [];
     const bonjour = new _bonjour();
     const browser = bonjour.find(
@@ -173,7 +177,14 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
     return services;
   }
 
-  async mDNS_start() {
+  clickedmdns_restart(): void {
+    // console.log("button _refreshOTA!");
+    this._refreshOTA = 6;
+    this._OTA = []; //Lets clear our old devices hanging around every once in a while.  You unplugged, right?
+    this.mDNS_start();
+  }
+
+  mDNS_start(): void {
     //  bonjour.find({ type: "arduino" }, this.newService);
     /*     const tokenSrc = new CancellationTokenSource();
     const services = await this.find(tokenSrc.token);
@@ -188,28 +199,38 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
       return;
     }
     console.log(selected.service); */
+    // console.log("starting FIND!");
 
-    /*     let eota: OTAPlus;
-    eota = {
-      Name: selected.service.name,
-      Caption: selected.service.host,
-      DeviceID: selected.service.addresses[0],
-      Usernamed: "",
-      vendorId: "undefined",
-      productId: "undefined",
-      address: selected.service.addresses[0],
-      //name: string = "";
-      fqdn: selected.service.fqdn,
-      host: selected.service.host,
-      port: selected.service.port,
-      auth_upload: selected.service.txt.auth_upload,
-      board: selected.service.txt.board,
-    };
-    console.log(this._OTA.push(eota));
-    this.refresh(); */
-    console.log("starting FIND!");
-    this._bonjour.find({ type: "arduino" }, this.newService.bind(this));
+    //Here so other things can start this and we dont end up with holes?
+    clearInterval(this._timerBonjour);
 
+    this._refreshOTA = this._refreshOTA + 1;
+
+    if (this._refreshOTA > 5) {
+      // console.log("starting _refreshOTA!");
+      this._refreshOTA = 0;
+      this._OTA = []; //Lets clear our old devices hanging around every once in a while.  You unplugged, right?
+    }
+
+    let browser = this._bonjour.find(
+      { type: "arduino" },
+      this.newService.bind(this)
+    );
+    //console.log(browser);
+    this._timerBonjour = setInterval(() => {
+      clearInterval(this._timerBonjour);
+      //  console.log("browser");
+      //  console.log(browser);
+      browser.stop();
+      this.mDNS_start();
+    }, 60000);
+    //RARE anything says its down.  all my OTA just disappear because unplugged.
+    // down.on("down", (service) => {
+    //   console.log("DOWN DOWN");
+    //   console.log(service);
+    //   console.log(service.txt.board);
+    // });
+    //THIS BIT ME!!!!  https://stackoverflow.com/questions/20279484/how-to-access-the-correct-this-inside-a-callback
     /*  this._bonjour.find({ type: "arduino" }, (service) => {
       console.log("newService service");
       //  console.log(service.type);
@@ -244,10 +265,10 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
   }
 
   newService(service: any) {
-    console.log("newService service");
+    // console.log("newService service");
     //  console.log(service.type);
-    console.log(service);
-    console.log(service.txt.board);
+    //  console.log(service);
+    //  console.log(service.txt.board);
 
     // let otacom:Com = new Com(){
     //   Name: service.name,
@@ -275,39 +296,15 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
       auth_upload: service.txt.auth_upload,
       board: service.txt.board,
     };
-    //this._svc.push(service);
-    // let eota: Com[] = [];
-    // console.log("TRUCK");
-    // let lent = eota.push({
-    //   Name: "FIRE",
-    //   Caption: "TRUCK",
-    //   DeviceID: "TRUCK",
-    //   Usernamed: "",
-    //   vendorId: "undefined",
-    //   productId: "undefined",
-    // });
-    // this._OTA.push(eota);
-    console.log("eota");
-    console.log(eota);
-    //  this.wtf(eota);
+    this._OTA = this._OTA.filter((element) => element.fqdn !== service.fqdn);
+    // this._OTA = this._OTA.filter(
+    //   (element) => element.DeviceID !== service.addresses[0]
+    // );
     this._OTA.push(eota);
-    console.log("FARGING ICEHOLE:");
-    console.log(this._OTA);
+    this._OTA.sort((a, b) => a.Name.localeCompare(b.Name));
+    //  console.log("FARGING ICEHOLE:");
+    //  console.log(this._OTA);
     this.refresh();
-  }
-  // class OTAPlus extends Com {
-  //   address: string = "";
-  //   //name: string = "";
-  //   fqdn: string = "";
-  //   host: string = "";
-  //   port: number = 0;
-  //   auth_upload: string = "";
-  //   board: string = "";
-  // }
-  wtf(datain: OTAPlus) {
-    console.log("datain");
-    console.log(datain);
-    console.log(this._OTA.push(datain));
   }
 
   getTreeItem(element: SerialD): TreeItem {
@@ -380,8 +377,6 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
   };
 
   tryrename = async (item: SerialD) => {
-    console.log(this._svc);
-
     //  tryrename = async (item:string)=>{//
     let data: string | undefined = await window.showInputBox({
       prompt: `Rename ${item.jsondata.Caption} to:`,
@@ -504,6 +499,15 @@ https://stackoverflow.com/questions/42464838/what-is-the-most-efficient-way-to-d
       return result;
     }, result); */
   }
+
+  setclipboard = async (node: SerialD) => {
+    let txt: string = `${node.label} : ${node.description}`;
+    console.log(txt);
+    await env.clipboard.writeText(txt);
+
+    commands.executeCommand("arduino.selectSerialPort");
+  };
+
   getdevices = async () => {
     let oldcomcount: number = this._coms.length;
     //  console.log("oldcomcount");
@@ -512,6 +516,10 @@ https://stackoverflow.com/questions/42464838/what-is-the-most-efficient-way-to-d
     this._coms = await this.mySerialD().then(function (value) {
       return value;
     });
+    this._coms.sort((a, b) =>
+      a.Caption.localeCompare(b.Caption, "en", { numeric: true })
+    );
+    //const sortAlphaNum = (a, b) => a.localeCompare(b, 'en', { numeric: true })
     // console.log("this._coms.length");
     // console.log(this._coms.length);
     if (oldcomcount === 0) {
@@ -607,6 +615,9 @@ https://stackoverflow.com/questions/42464838/what-is-the-most-efficient-way-to-d
         coms = await this.mySerialD().then(function (value) {
           return value;
         });
+        // coms.sort((a, b) =>
+        //   a.Caption.localeCompare(b.Caption, "en", { numeric: true })
+        // );
       }
 
       let treeSerialD: SerialD[] = [];
@@ -646,6 +657,9 @@ https://stackoverflow.com/questions/42464838/what-is-the-most-efficient-way-to-d
             i
           ].tooltip = `Click to Rename. \n\n${coms[i].Caption}\n${coms[i].Name}`;
         }
+        treeSerialD.sort((a, b) =>
+          a.label.localeCompare(b.label, "en", { numeric: true })
+        );
       }
       //CHANGED CHILDREN!
       if (this._comChanged.length !== 0) {
@@ -673,7 +687,7 @@ https://stackoverflow.com/questions/42464838/what-is-the-most-efficient-way-to-d
               break;
           }
           */
-          console.log(cption);
+          // console.log(cption);
           treeSerialD[i + plus] = new SerialD(
             cption,
             TreeItemCollapsibleState.None,
@@ -692,9 +706,36 @@ https://stackoverflow.com/questions/42464838/what-is-the-most-efficient-way-to-d
         }
         this._comChanged = [];
       }
-      //this.dorefresh();
+
       if (this._OTA.length !== 0) {
-        const plus = treeSerialD.length;
+        let plus = treeSerialD.length;
+        let ni = 0;
+        //////
+        treeSerialD[ni + plus] = new SerialD(
+          "--= Network Devices =--",
+          TreeItemCollapsibleState.None,
+          {
+            command: "serialdevices.restartmdns",
+            title: "Network Devices",
+            tooltip: `header`,
+          },
+          "blank",
+          {
+            Name: "",
+            Caption: "",
+            DeviceID: "",
+            Usernamed: "",
+            productId: "",
+            vendorId: "",
+          }
+        );
+        treeSerialD[ni + plus].command.arguments = [treeSerialD[ni + plus]];
+        treeSerialD[ni + plus].id = ni + plus.toString();
+        treeSerialD[ni + plus].description = "";
+        treeSerialD[ni + plus].tooltip = `Click to Refresh OTA.`;
+
+        plus = treeSerialD.length;
+
         for (var i = 0; i < this._OTA.length; i++) {
           let renamed: Com[] = this._RenamedDevices.filter(
             (element) => element.DeviceID === this._OTA[i].DeviceID
@@ -717,22 +758,26 @@ https://stackoverflow.com/questions/42464838/what-is-the-most-efficient-way-to-d
               break;
           }
           */
-          console.log(cption);
+          //console.log(cption);
           treeSerialD[i + plus] = new SerialD(
             cption,
             TreeItemCollapsibleState.None,
             {
-              command: "",
+              command: "serialdevices.renameEntry",
               title: this._OTA[i].Caption,
               tooltip: `DeviceID:  ${this._OTA[i].DeviceID}`,
             },
-            "com",
+            "wifi",
             this._OTA[i]
           );
           treeSerialD[i + plus].command.arguments = [treeSerialD[i + plus]];
           treeSerialD[i + plus].id = i + plus.toString();
-          // treeSerialD[i + plus].description = this._OTA[i].address; // this._comChanged[i].Caption;
-          treeSerialD[i + plus].tooltip = `Click to Rename.`;
+          //https://code.visualstudio.com/api/references/vscode-api#MarkdownString
+          treeSerialD[i + plus].description = this._OTA[i].address; // this._comChanged[i].Caption;
+          treeSerialD[i + plus].tooltip = new MarkdownString(
+            `# ${this._OTA[i].address}`
+          ); // `Click to Rename.`;
+          //  console.log(treeSerialD[i + plus].iconPath);
         }
       }
       //setTimeout(this.getdevices, 500);//wait 2 seconds
@@ -837,7 +882,7 @@ export class SerialD extends TreeItem {
     public readonly label: string,
     public readonly collapsibleState: TreeItemCollapsibleState,
     public readonly command: Command,
-    public readonly type: "com",
+    public readonly type: string,
     public jsondata: Com
   ) {
     super(label, collapsibleState);
