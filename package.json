@@ -4,7 +4,7 @@
   "description": "Scan for Serial Devices. Newly added over the air!",
   "icon": "images/SerialScanner.png",
   "publisher": "TreyAughenbaugh",
-  "version": "0.1.1",
+  "version": "0.2.1",
   "engines": {
     "vscode": "^1.66.0"
   },
@@ -34,11 +34,16 @@
     "commands": [
       {
         "command": "serialdevices.getsomedevices",
-        "title": "Refresh Devices"
+        "title": "Serial Devies: Refresh Devices"
+      },
+      {
+        "command": "serialdevices.restartmdns",
+        "title": "Serial Devies: Refresh MDNS"
       },
       {
         "command": "serialdevices.refreshEntry",
-        "title": "Scan for changes.",
+        "when": "",
+        "title": "Serial Devies: Scan for changes.",
         "icon": {
           "light": "./resources/refresh.svg",
           "dark": "./resources/refresh.svg"
@@ -72,12 +77,12 @@
       "view/item/context": [
         {
           "command": "serialdevices.arduino_sp",
-          "when": "view == SerialDeviceProviderService",
+          "when": "view == SerialDeviceProviderService && viewItem!=networklbl",
           "group": "inline"
         },
         {
           "command": "serialdevices.unrename",
-          "when": "view == SerialDeviceProviderService",
+          "when": "view == SerialDeviceProviderService && viewItem!=networklbl",
           "group": "inline"
         }
       ]
@@ -100,8 +105,6 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@types/bonjour": "^3.5.5",
-    "@types/mdns": "0.0.33",
     "@types/vscode": "^1.66.0",
     "@types/glob": "^7.2.0",
     "@types/mocha": "^9.1.0",
@@ -115,7 +118,6 @@
     "@vscode/test-electron": "^2.1.2"
   },
   "dependencies": {
-    "bonjour": "^3.5.0",
     "bonjour-service": "^1.0.12",
     "serialport": "^10.4.0"
   }
