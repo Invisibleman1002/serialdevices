@@ -135,10 +135,14 @@ class SerialProvider {
             }
         };
         this.setclipboard = async (node) => {
-            let txt = `${node.label} : ${node.description}`;
-            console.log(txt);
+            let txt = "";
+            if (node.type === "wifi") {
+                txt = `${node.jsondata.Caption} : ${node.description}`;
+            }
+            if (node.type === "com") {
+                txt = node.jsondata.Caption;
+            }
             await vscode_1.env.clipboard.writeText(txt);
-            vscode_1.commands.executeCommand("arduino.selectSerialPort");
         };
         this.getdevices = async () => {
             let oldcomcount = this._coms.length;
@@ -248,51 +252,63 @@ class SerialProvider {
         //   console.log("down");
         // });
     }
-    async find(token) {
-        // console.log("inside find:");
-        const services = [];
-        const bonjour = new bonjour_service_1.default();
-        const browser = bonjour.find({ type: "arduino", protocol: "tcp" }, function (service) {
-            services.push({
-                label: service.name,
-                service,
+    /*   async find(token: CancellationToken): Promise<item[]> {
+      // console.log("inside find:");
+      const services: item[] = [];
+      const bonjour = new _bonjour();
+      const browser = bonjour.find(
+        { type: "arduino", protocol: "tcp" },
+        function (service) {
+          services.push({
+            label: service.name,
+            service,
+          });
+        }
+      );
+  
+      await window.withProgress(
+        {
+          location: ProgressLocation.Notification,
+          title: "Discovered",
+          cancellable: true,
+        },
+        (progress, token) => {
+          const step = 100 / 10;
+          const nobodyMsg = "nobody 😢";
+          progress.report({
+            increment: 0,
+            message: nobodyMsg,
+          });
+  
+          return new Promise((resolve) => {
+            let elapsed = 0;
+            const interval = setInterval(() => {
+              elapsed++;
+              const names = services.map((s) => s.label).join(", ");
+              const message = names || nobodyMsg;
+              progress.report({
+                increment: step,
+                message: message,
+              });
+  
+              if (elapsed === 10) {
+                clearInterval(interval);
+                resolve("resolve");
+              }
+            }, 1000);
+  
+            token.onCancellationRequested(() => {
+              clearInterval(interval);
+              resolve("resolve");
             });
-        });
-        await vscode_1.window.withProgress({
-            location: vscode_1.ProgressLocation.Notification,
-            title: "Discovered",
-            cancellable: true,
-        }, (progress, token) => {
-            const step = 100 / 10;
-            const nobodyMsg = "nobody 😢";
-            progress.report({
-                increment: 0,
-                message: nobodyMsg,
-            });
-            return new Promise((resolve) => {
-                let elapsed = 0;
-                const interval = setInterval(() => {
-                    elapsed++;
-                    const names = services.map((s) => s.label).join(", ");
-                    const message = names || nobodyMsg;
-                    progress.report({
-                        increment: step,
-                        message: message,
-                    });
-                    if (elapsed === 10) {
-                        clearInterval(interval);
-                        resolve("resolve");
-                    }
-                }, 1000);
-                token.onCancellationRequested(() => {
-                    clearInterval(interval);
-                    resolve("resolve");
-                });
-            });
-        });
-        browser.stop();
-        return services;
+          });
+        }
+      );
+  
+      browser.stop();
+      return services;
     }
+   */
     clickedmdns_restart() {
         // console.log("button _refreshOTA!");
         this._refreshOTA = 6;
@@ -324,11 +340,10 @@ class SerialProvider {
             this._OTA = []; //Lets clear our old devices hanging around every once in a while.  You unplugged, right?
         }
         let browser = this._bonjour.find({ type: "arduino" }, this.newService.bind(this));
-        //console.log(browser);
+        //we stop and restart the discovery because I remember reading about a bug that found devices that disconnect, dont get found again.
+        //Maybe fixed?
         this._timerBonjour = setInterval(() => {
             clearInterval(this._timerBonjour);
-            //  console.log("browser");
-            //  console.log(browser);
             browser.stop();
             this.mDNS_start();
         }, 60000);
@@ -372,18 +387,6 @@ class SerialProvider {
         }); */
     }
     newService(service) {
-        // console.log("newService service");
-        //  console.log(service.type);
-        //  console.log(service);
-        //  console.log(service.txt.board);
-        // let otacom:Com = new Com(){
-        //   Name: service.name,
-        //   Caption: item.jsondata.Caption,
-        //   DeviceID: item.jsondata.DeviceID,
-        //   Usernamed: undefined,
-        //   vendorId: item.jsondata.vendorId,
-        //   productId: item.jsondata.productId,
-        // };
         //---------------------------------------------  REVISIT THIS!  might have to do on multiple
         //this._OTA = this._OTA.filter((element) => element.fqdn !== service.fqdn);
         let eota;
@@ -403,34 +406,11 @@ class SerialProvider {
             board: service.txt.board,
         };
         this._OTA = this._OTA.filter((element) => element.fqdn !== service.fqdn);
-        // this._OTA = this._OTA.filter(
-        //   (element) => element.DeviceID !== service.addresses[0]
-        // );
         this._OTA.push(eota);
         this._OTA.sort((a, b) => a.Name.localeCompare(b.Name));
-        //  console.log("FARGING ICEHOLE:");
-        //  console.log(this._OTA);
         this.refresh();
     }
     getTreeItem(element) {
-        // let renamed: Com[] = this._RenamedDevices.filter(
-        //   (element) => element.DeviceID === element.DeviceID
-        // );
-        //  console.log("getTreeItem");
-        // console.log(element);
-        // let updatedelement = new SerialD(
-        //   cption,
-        //   TreeItemCollapsibleState.None,
-        //   {
-        //     command: "serialdevices.renameEntry",
-        //     title: element.Caption,
-        //     tooltip: `DeviceID:  ${element.DeviceID}`,
-        //   },
-        //   "com",
-        //   coms[i]
-        // );
-        // treeSerialD[i].command.arguments = [treeSerialD[i]];
-        // treeSerialD[i].id = i.toString();
         return element;
     }
     async onFileClicked(diffs) {
@@ -525,6 +505,15 @@ class SerialProvider {
             }
         });
     }
+    generatedash(strin) {
+        let dash = "";
+        // console.log("----------------");
+        // console.log(this._refreshOTA);
+        for (var i = this._refreshOTA + 1; i < 6; i++) {
+            dash = dash + "~";
+        }
+        return strin + dash;
+    }
     async getChildren(element) {
         // console.log("---getChildren-------------");
         // console.log(element);
@@ -568,7 +557,7 @@ class SerialProvider {
                     treeSerialD[i].command.arguments = [treeSerialD[i]];
                     treeSerialD[i].id = i.toString();
                     treeSerialD[i].description = coms[i].Name;
-                    treeSerialD[i].tooltip = `Click to Rename. \n\n${coms[i].Caption}\n${coms[i].Name}`;
+                    treeSerialD[i].tooltip = new vscode_1.MarkdownString(`Click to rename\n___\n- *PORT:=*    **${coms[i].Caption}**\n- *friendlyName:=*  **${coms[i].Name}**`); //`Click to Rename. \n\n${coms[i].Caption}\n${coms[i].Name}`;
                 }
                 treeSerialD.sort((a, b) => a.label.localeCompare(b.label, "en", { numeric: true }));
             }
@@ -611,8 +600,9 @@ class SerialProvider {
             if (this._OTA.length !== 0) {
                 let plus = treeSerialD.length;
                 let ni = 0;
-                //////
-                treeSerialD[ni + plus] = new SerialD("--= Network Devices =--", vscode_1.TreeItemCollapsibleState.None, {
+                let NetworkLabel = "--= Network Devices =--";
+                //this._refreshOTA
+                treeSerialD[ni + plus] = new SerialD(this.generatedash(NetworkLabel), vscode_1.TreeItemCollapsibleState.None, {
                     command: "serialdevices.restartmdns",
                     title: "Network Devices",
                     tooltip: `header`,
@@ -628,6 +618,7 @@ class SerialProvider {
                 treeSerialD[ni + plus].id = ni + plus.toString();
                 treeSerialD[ni + plus].description = "";
                 treeSerialD[ni + plus].tooltip = `Click to Refresh OTA.`;
+                treeSerialD[ni + plus].contextValue = "networklbl"; //This allows me to hide the ICON in Package.json
                 plus = treeSerialD.length;
                 for (var i = 0; i < this._OTA.length; i++) {
                     let renamed = this._RenamedDevices.filter((element) => element.DeviceID === this._OTA[i].DeviceID);
@@ -658,11 +649,10 @@ class SerialProvider {
                     treeSerialD[i + plus].id = i + plus.toString();
                     //https://code.visualstudio.com/api/references/vscode-api#MarkdownString
                     treeSerialD[i + plus].description = this._OTA[i].address; // this._comChanged[i].Caption;
-                    treeSerialD[i + plus].tooltip = new vscode_1.MarkdownString(`# ${this._OTA[i].address}`); // `Click to Rename.`;
+                    treeSerialD[i + plus].tooltip = new vscode_1.MarkdownString(`Click to rename\n___\n- *IP:=*    **${this._OTA[i].address}**\n- *Host:=*  **${this._OTA[i].host}**\n- *fqdn:=*  **${this._OTA[i].fqdn}**\n- *Board:=* **${this._OTA[i].board}**`);
                     //  console.log(treeSerialD[i + plus].iconPath);
                 }
             }
-            //setTimeout(this.getdevices, 500);//wait 2 seconds
             return treeSerialD;
         }
         else {

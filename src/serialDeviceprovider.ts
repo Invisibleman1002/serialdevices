@@ -11,9 +11,9 @@ import {
   MarkdownString,
   env,
   commands,
-  CancellationToken,
-  CancellationTokenSource,
-  ProgressLocation,
+  //CancellationToken,
+  // CancellationTokenSource,
+  //ProgressLocation,
 } from "vscode";
 import { join, resolve } from "path";
 //import { spawn } from "child_process";
@@ -120,7 +120,7 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
     // });
   }
 
-  async find(token: CancellationToken): Promise<item[]> {
+  /*   async find(token: CancellationToken): Promise<item[]> {
     // console.log("inside find:");
     const services: item[] = [];
     const bonjour = new _bonjour();
@@ -176,7 +176,7 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
     browser.stop();
     return services;
   }
-
+ */
   clickedmdns_restart(): void {
     // console.log("button _refreshOTA!");
     this._refreshOTA = 6;
@@ -216,11 +216,10 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
       { type: "arduino" },
       this.newService.bind(this)
     );
-    //console.log(browser);
+    //we stop and restart the discovery because I remember reading about a bug that found devices that disconnect, dont get found again.
+    //Maybe fixed?
     this._timerBonjour = setInterval(() => {
       clearInterval(this._timerBonjour);
-      //  console.log("browser");
-      //  console.log(browser);
       browser.stop();
       this.mDNS_start();
     }, 60000);
@@ -265,19 +264,6 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
   }
 
   newService(service: any) {
-    // console.log("newService service");
-    //  console.log(service.type);
-    //  console.log(service);
-    //  console.log(service.txt.board);
-
-    // let otacom:Com = new Com(){
-    //   Name: service.name,
-    //   Caption: item.jsondata.Caption,
-    //   DeviceID: item.jsondata.DeviceID,
-    //   Usernamed: undefined,
-    //   vendorId: item.jsondata.vendorId,
-    //   productId: item.jsondata.productId,
-    // };
     //---------------------------------------------  REVISIT THIS!  might have to do on multiple
     //this._OTA = this._OTA.filter((element) => element.fqdn !== service.fqdn);
     let eota: OTAPlus;
@@ -297,37 +283,12 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
       board: service.txt.board,
     };
     this._OTA = this._OTA.filter((element) => element.fqdn !== service.fqdn);
-    // this._OTA = this._OTA.filter(
-    //   (element) => element.DeviceID !== service.addresses[0]
-    // );
     this._OTA.push(eota);
     this._OTA.sort((a, b) => a.Name.localeCompare(b.Name));
-    //  console.log("FARGING ICEHOLE:");
-    //  console.log(this._OTA);
     this.refresh();
   }
 
   getTreeItem(element: SerialD): TreeItem {
-    // let renamed: Com[] = this._RenamedDevices.filter(
-    //   (element) => element.DeviceID === element.DeviceID
-    // );
-
-    //  console.log("getTreeItem");
-    // console.log(element);
-    // let updatedelement = new SerialD(
-    //   cption,
-    //   TreeItemCollapsibleState.None,
-    //   {
-    //     command: "serialdevices.renameEntry",
-    //     title: element.Caption,
-    //     tooltip: `DeviceID:  ${element.DeviceID}`,
-    //   },
-    //   "com",
-    //   coms[i]
-    // );
-    // treeSerialD[i].command.arguments = [treeSerialD[i]];
-    // treeSerialD[i].id = i.toString();
-
     return element;
   }
 
@@ -501,11 +462,15 @@ https://stackoverflow.com/questions/42464838/what-is-the-most-efficient-way-to-d
   }
 
   setclipboard = async (node: SerialD) => {
-    let txt: string = `${node.label} : ${node.description}`;
-    console.log(txt);
-    await env.clipboard.writeText(txt);
+    let txt: string = "";
+    if (node.type === "wifi") {
+      txt = `${node.jsondata.Caption} : ${node.description}`;
+    }
+    if (node.type === "com") {
+      txt = node.jsondata.Caption;
+    }
 
-    commands.executeCommand("arduino.selectSerialPort");
+    await env.clipboard.writeText(txt);
   };
 
   getdevices = async () => {
@@ -599,6 +564,16 @@ https://stackoverflow.com/questions/42464838/what-is-the-most-efficient-way-to-d
       });
   }
 
+  generatedash(strin: string): string {
+    let dash: string = "";
+    // console.log("----------------");
+    // console.log(this._refreshOTA);
+    for (var i = this._refreshOTA + 1; i < 6; i++) {
+      dash = dash + "~";
+    }
+    return strin + dash;
+  }
+
   public async getChildren(element?: SerialD): Promise<SerialD[]> {
     // console.log("---getChildren-------------");
     // console.log(element);
@@ -653,9 +628,9 @@ https://stackoverflow.com/questions/42464838/what-is-the-most-efficient-way-to-d
           treeSerialD[i].command.arguments = [treeSerialD[i]];
           treeSerialD[i].id = i.toString();
           treeSerialD[i].description = coms[i].Name;
-          treeSerialD[
-            i
-          ].tooltip = `Click to Rename. \n\n${coms[i].Caption}\n${coms[i].Name}`;
+          treeSerialD[i].tooltip = new MarkdownString(
+            `Click to rename\n___\n- *PORT:=*    **${coms[i].Caption}**\n- *friendlyName:=*  **${coms[i].Name}**`
+          ); //`Click to Rename. \n\n${coms[i].Caption}\n${coms[i].Name}`;
         }
         treeSerialD.sort((a, b) =>
           a.label.localeCompare(b.label, "en", { numeric: true })
@@ -710,9 +685,12 @@ https://stackoverflow.com/questions/42464838/what-is-the-most-efficient-way-to-d
       if (this._OTA.length !== 0) {
         let plus = treeSerialD.length;
         let ni = 0;
-        //////
+        let NetworkLabel: string = "--= Network Devices =--";
+
+        //this._refreshOTA
+
         treeSerialD[ni + plus] = new SerialD(
-          "--= Network Devices =--",
+          this.generatedash(NetworkLabel),
           TreeItemCollapsibleState.None,
           {
             command: "serialdevices.restartmdns",
@@ -733,7 +711,7 @@ https://stackoverflow.com/questions/42464838/what-is-the-most-efficient-way-to-d
         treeSerialD[ni + plus].id = ni + plus.toString();
         treeSerialD[ni + plus].description = "";
         treeSerialD[ni + plus].tooltip = `Click to Refresh OTA.`;
-
+        treeSerialD[ni + plus].contextValue = "networklbl"; //This allows me to hide the ICON in Package.json
         plus = treeSerialD.length;
 
         for (var i = 0; i < this._OTA.length; i++) {
@@ -775,12 +753,11 @@ https://stackoverflow.com/questions/42464838/what-is-the-most-efficient-way-to-d
           //https://code.visualstudio.com/api/references/vscode-api#MarkdownString
           treeSerialD[i + plus].description = this._OTA[i].address; // this._comChanged[i].Caption;
           treeSerialD[i + plus].tooltip = new MarkdownString(
-            `# ${this._OTA[i].address}`
-          ); // `Click to Rename.`;
+            `Click to rename\n___\n- *IP:=*    **${this._OTA[i].address}**\n- *Host:=*  **${this._OTA[i].host}**\n- *fqdn:=*  **${this._OTA[i].fqdn}**\n- *Board:=* **${this._OTA[i].board}**`
+          );
           //  console.log(treeSerialD[i + plus].iconPath);
         }
       }
-      //setTimeout(this.getdevices, 500);//wait 2 seconds
 
       return treeSerialD;
     } else {

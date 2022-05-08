@@ -1,6 +1,9 @@
 # Serial Devices
 
 This is useful for microcontroller development. It lists the Serial Device and allows for giving them an alternate name. So instead of seeing COM3, you can rename it to ESP32_SENSOR. Since Com port numbers change, it uses the DeviceID/pnpid to be more accurate for the search when checking for name.
+NEW ADDITION! I added a mDNS discovery to pull in Arduino OTA devices.
+When the Extension is running, it starts the discovery. Since OTA seem to be erratic, I dont clear the list while its discoering and I stop the broswer and restart it every 60 seconds. The reason for this is due to found devices may not be found again during that 60 seconds if removed.  
+After 6 mimutes of scanning, it clears the list and starts again. This removes stale OTA devices. Pressing the -=Network Devices=- item, forces a clear and refresh immediately.
 
 ## Features
 
@@ -17,16 +20,18 @@ If you notice below the serial numbers is the same for both COM16 and COM17. If 
 
 ![COMPROGRAMMING](./assets/SerialDevices.gif)
 
-## Requirements
-
-I had wrote my own Serial Port scanner using .NET Core as I wasnt sure the best one to use until I looked at the extension details for the Arduno VSC plugin.
+## ?
 
 - I switched my code to use this one. https://serialport.io/docs/
+
+- Future version possible use https://github.com/MadLittleMods/node-usb-detection
+
+- Would be nice if Arduino extension gave the USB port is connected to and allows to set it though another extension.
 
 ## HELP
 
 If you have the arduino extension installed, the code will execute the command below when clicking the arduino icon.
-THe problem is, it just shows the QuickPick window, but wont send it the correct port. Does anyone know how to send that extension the Port update?
+The problem is, it just shows the QuickPick window, but wont send it the correct port. Does anyone know how to send that extension the Port update?
 
 `commands.executeCommand("arduino.selectSerialPort", "0x0403", "0x6001")`
 

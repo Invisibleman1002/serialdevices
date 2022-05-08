@@ -5,10 +5,10 @@ import {
   ExtensionContext,
   window,
   commands,
-  env,
-  Clipboard,
-  TreeItem,
-  ConfigurationTarget,
+  // env,
+  // Clipboard,
+  // TreeItem,
+  // ConfigurationTarget,
 } from "vscode";
 import { SerialProvider, SerialD } from "./serialDeviceprovider";
 
@@ -37,6 +37,11 @@ export function activate(context: ExtensionContext) {
       serProvider.dorefresh()
     )
   );
+  context.subscriptions.push(
+    commands.registerCommand("serialdevices.refreshmdns", () =>
+      serProvider.mDNS_start()
+    )
+  );
 
   // ! this wont work!  I mean, it pops open the Serial Port Selection but wont select it.
   commands.registerCommand("serialdevices.arduino_sp", (node: SerialD) => {
@@ -45,12 +50,16 @@ export function activate(context: ExtensionContext) {
     //This doesnt work, yet...   Maybe there is a way to send the port to the Arduino VSC Ext.
     if (node.type === "wifi") {
       serProvider.setclipboard(node);
+
+      commands.executeCommand("arduino.selectSerialPort");
+      sendClipboard();
     }
     if (
       node.jsondata.vendorId &&
       node.jsondata.productId &&
       node.type === "com"
     ) {
+      serProvider.setclipboard(node);
       const valueOfVid = parseInt(node.jsondata.vendorId, 16);
       const valueOfPid = parseInt(node.jsondata.productId, 16);
       // console.log(valueOfPid);
@@ -59,6 +68,9 @@ export function activate(context: ExtensionContext) {
         valueOfVid,
         valueOfPid
       );
+
+      sendClipboard();
+
       //commands.executeCommand("arduino.selectSerialPort", "0x0403", "0x6001")
     }
   });
@@ -87,6 +99,11 @@ export function activate(context: ExtensionContext) {
   // });
 
   // context.subscriptions.push(disposable);
+}
+
+async function sendClipboard() {
+  await new Promise((r) => setTimeout(r, 400));
+  commands.executeCommand("editor.action.clipboardPasteAction");
 }
 
 // this method is called when your extension is deactivated
