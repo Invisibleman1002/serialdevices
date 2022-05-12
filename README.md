@@ -7,7 +7,7 @@ After 6 mimutes of scanning, it clears the list and starts again. This removes s
 I just added the ability for it to detect the COM port listed in the arduino.json file. It now highlights the one currently being used.
 
 ![Devices](./assets/SerialDevices.png)
-![DeviceRemoved](./assets/removed.png)
+![DeviceRemoved](./assets/Removed.png)
 
 ## Features
 
