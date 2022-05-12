@@ -34,7 +34,7 @@ When a Device is removed, it doesn't disappear from the list right away but show
 
 ![COMPROGRAMMING](./assets/SerialDevices.gif)
 
-## Example of the additional arduino.json com port read and Over teh Air device discovery.
+## Example of the additional arduino.json com port read and Over the Air device discovery.
 
 ![COMPROGRAMMING](./assets/Serial_OTA.gif)
 
@@ -54,7 +54,23 @@ When a Device is removed, it doesn't disappear from the list right away but show
 
 - Would be nice if Arduino extension gave the USB port it is connected to and would allow to be set by another extension.
 
-- Maybe use the arduino.json fall for use in the COM details and auto re-label the port based on the projects name.
+- Maybe use the arduino.json file for use in the COM details and auto re-label the port based on the projects name.
+
+## Shoutout
+
+- I used this project to create my animated gifs. https://marketplace.visualstudio.com/items?itemName=arcsine.chronicler
+  - Chronicler will create animated gifs perfectly, but I wants to add some text in the video.
+- I also VSDC Free Video Editor. I used to use HITFILM Express but now it says "hitfilm support for AVC / h264 video requires a licensed version of hitfilm pro". I can't see buying a pro version just to add text to a video when it used to be free. https://www.videosoftdev.com/how-to-add-text-to-your-video-or-an-image
+
+- Here are the commands I used to generate the animated GIF after I edited the video.
+
+```
+"C:\Program Files\ffmpeg\bin\ffmpeg.exe" -i SerialD.mp4 -filter_complex "[0:v] palettegen" paletted.png
+
+"C:\Program Files\ffmpeg\bin\ffmpeg.exe" -i SerialD.mp4 -i paletted.png -lavfi "fps=12,paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle" -y doutput.gif
+```
+
+- First video is Chonicler generating the animated gif, Second video above is Chronicler creating the MP4 file(That HITFILM wont allow editing), I edited in VSDC, exported as mp4, then ran the above commands on it.
 
 ## HELP
 
@@ -71,6 +87,8 @@ The above command actually runs this command:
 Sadly it does not work, just opens the quick pick but doesnt use the details to select the port.
 
 UPDATE! I'm now able to paste in the selected port but pressing enter is still required to pick it.
+
+### I came from a background where Javascript is used for form validation, not a full blown app. This still seems odd to be using JavaScript when something compiled would be better. With that being said, I would LOVE to see the correct way to code this thing.
 
 ## Extension Settings
 

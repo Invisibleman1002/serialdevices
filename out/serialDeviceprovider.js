@@ -18,8 +18,6 @@ const bonjour_service_1 = require("bonjour-service");
 //import bonjour = require("bonjour");
 //const bonjour = new _bonjour();
 class SerialProvider {
-    //private _devices: string[][] = [];
-    //   private _devices: object = {};
     constructor(storage) {
         this._onDidChangeTreeData = new vscode_1.EventEmitter();
         //private _onDidChangeTreeData: EventEmitter<Dependency | undefined | null | void> = new vscode.EventEmitter<Dependency | undefined | null | void>();
@@ -27,7 +25,6 @@ class SerialProvider {
         this._refreshcount = 0;
         this._refreshOTA = 0; //Clear the OTA every x cycles.
         this._RenamedDevices = [];
-        this._refresh = true;
         this._coms = [];
         this._comChanged = [];
         this._OTA = [];
@@ -58,48 +55,14 @@ class SerialProvider {
             this.refresh();
         };
         this.tryrename = async (item) => {
-            //  tryrename = async (item:string)=>{//
             let data = await vscode_1.window.showInputBox({
                 prompt: `Rename ${item.jsondata.Caption} to:`,
             });
-            // window.withProgress(
-            //   {
-            //     location: ProgressLocation.Notification,
-            //     title: "Finding ...",
-            //     cancellable: false,
-            //   },
-            //   async (progress, token) => {
-            //     for (let i = 0; i < 10; i++) {
-            //       setTimeout(() => {
-            //         progress.report({ increment: i * 10, message: "title" });
-            //       }, 10000);
-            //     }
-            //   }
-            // );
-            // let i = 0;
-            // const result = await window.showQuickPick(["eins", "zwei", "drei"], {
-            //   placeHolder: "eins, zwei or drei",
-            //   onDidSelectItem: (item) =>
-            //     window.showInformationMessage(`Focus ${++i}: ${item}`),
-            // });
-            /*
-            await window.showInputBox({
-              value: 'abcdef',
-              valueSelection: [2, 4],
-              placeHolder: 'For example: fedcba. But not: 123',
-              validateInput: text => {
-                window.showInformationMessage(`Validating: ${text}`);
-                return text === '123' ? 'Not 123!' : null;
-              }
-            });*/
-            // console.log(data);
-            // console.log(item);
             if (data !== undefined) {
                 //could scan the list and make sure there is not one already names this..
                 //If so..  data+'_1';
                 //We need eliminate ones if we already
                 this._RenamedDevices = this._RenamedDevices.filter((element) => element.DeviceID !== item.jsondata.DeviceID);
-                // console.log(this._RenamedDevices);
                 this._RenamedDevices.push({
                     Name: item.jsondata.Name,
                     Caption: item.jsondata.Caption,
@@ -108,9 +71,6 @@ class SerialProvider {
                     vendorId: item.jsondata.vendorId,
                     productId: item.jsondata.productId,
                 });
-                // Memn;
-                // ExtensionContext.workspaceState.update("DEV", response);
-                // console.log(this._RenamedDevices);
                 this._storage.update("com", this._RenamedDevices);
                 vscode_1.window.showInformationMessage(`${item.jsondata.Caption} rename to ${data}.`);
                 this.refresh();
@@ -128,16 +88,11 @@ class SerialProvider {
         };
         this.getdevices = async () => {
             let oldcomcount = this._coms.length;
-            //  console.log("oldcomcount");
-            // console.log(oldcomcount);
             let old_coms = this._coms;
             this._coms = await this.mySerialD().then(function (value) {
                 return value;
             });
             this._coms.sort((a, b) => a.Caption.localeCompare(b.Caption, "en", { numeric: true }));
-            //const sortAlphaNum = (a, b) => a.localeCompare(b, 'en', { numeric: true })
-            // console.log("this._coms.length");
-            // console.log(this._coms.length);
             if (oldcomcount === 0) {
                 oldcomcount = this._coms.length;
                 old_coms = this._coms;
@@ -154,232 +109,28 @@ class SerialProvider {
                     vscode_1.window.showInformationMessage("Scanning timed-out.");
                 }
             }
-            /**
-             if (
-              this._refreshcount >= 30 ||
-              (comchanged === true && this._coms.length < oldcomcount)
-            ) {
-              clearInterval(this._timerObject);
-              this._refreshcount = 0;
-              // this._refresh =false;
-            }
-            if (comchanged === true) {
-              //lets do one more scan
-              this._refreshcount = 28;
-              // this._refresh =false;
-            }
-             */
-            // console.log(old_coms);
-            // console.log("^-before.. V-after..");
-            // if (old_coms.length > this._coms.length) {
             this._comChanged = this.f(old_coms, this._coms);
-            //  } else {
-            //  this._comChanged = this.f(this._coms, old_coms);
-            // }
-            // console.log(this._comChanged);
-            // let current = old_coms.filter(this.isinarray(element, index, arr, this._coms)
-            // );
-            // let current = old_coms.filter((o1) =>
-            //   this._coms.find((o2) => o1.DeviceID !== o2.DeviceID)
-            // );
-            // let different = this._coms.filter((o1) =>
-            //   old_coms.some((o2) => o1.DeviceID === o2.DeviceID)
-            // );
-            // this._coms = this._coms.sort(this.GetSortOrder("Usernamed"));
-            //this._coms.sort((a: any, b: any) => a.Caption - b.Caption);
             this.refresh();
         };
-        // window.setStatusBarMessage("computing...");
         let newwatcher = vscode_1.workspace.createFileSystemWatcher("**/arduino.json");
         newwatcher.onDidChange((uri) => {
-            // console.log(`this URL IS ${uri}`);
-            // console.log("checkport");
             this._clsArduino.setActiveCOMport();
             this._ArdCOM = this._clsArduino.getActiveCOMport();
         }); //this.checkport.bind(this));
         this.checkport();
         this._clsArduino.registerRefresh(() => this.refresh());
-        vscode_1.window.onDidChangeActiveTextEditor(this.CheckActiveDocument.bind(this)
-        /*  () => {
-          console.log("CheckActrive");
-          window.showInformationMessage(
-            `window.activeTextEditor: ${window.activeTextEditor?.document.uri.fsPath}`
-          );
-          console.log(this._clsArduino);
-          // window.showInformationMessage(
-          //   `workspaceFolderPath: ${workspace.workspaceFolders![0].uri.fsPath}`
-          // );
-          console.log(
-            window.activeTextEditor?.document.uri.toString().includes(".ino")
-          );
-          if (
-            window.activeTextEditor?.document.uri.fsPath !== undefined &&
-            window.activeTextEditor?.document.uri.toString().includes(".ino")
-          ) {
-            console.log("activeTextEditor");
-            console.log(
-              workspace.getWorkspaceFolder(window.activeTextEditor?.document.uri)
-                ?.uri
-            );
-            console.log("setActiveURI");
-            // this._clsArduino.setActiveURI(
-            //   "STRING" //workspace.getWorkspaceFolder(window.activeTextEditor?.document.uri)?.uri!.toString();
-            // );
-            if (this._clsArduino.checkexist() === true) {
-              console.log("checkexist");
-              // this._clsArduino.watchfile();
-              this._ArdCOM = this._clsArduino.getActiveCOMport();
-              this.refresh();
-            }
-  
-            window.showInformationMessage(
-              `getWorkspaceFolder: ${
-                workspace.getWorkspaceFolder(
-                  window.activeTextEditor?.document.uri
-                )?.uri.fsPath
-              }`
-            );
-          }
-        } */
-        );
-        // SerialPort.list().then(function (value) {
-        //   console.log("value");
-        //   console.log(value);
-        // });
-        /*     const valueOfVid = parseInt("0403", 16);
-        const valueOfPid = parseInt("6001", 16);
-        // console.log(extensions.all.map((x) => x.id));
-        SerialPort.list().then(function (value) {
-          value.find((p) => {
-            // The pid and vid returned by SerialPortCtrl start with 0x prefix in Mac, but no 0x prefix in Win32.
-            // Should compare with decimal value to keep compatibility.
-            if (p.productId && p.vendorId) {
-              console.log("value");
-              console.log(value);
-              console.log(
-                parseInt(p.productId, 16) === valueOfPid &&
-                  parseInt(p.vendorId, 16) === valueOfVid
-              );
-            }
-            //return false;
-          });
-        }); */
-        // if (this._clsArduino.checkexist() === true) {
-        //   //this._clsArduino.watchfile();
-        //   // this._ArdCOM = this._clsArduino.getActiveCOMport();
-        // }
-        // this._ArdJSON = "COM5";
+        vscode_1.window.onDidChangeActiveTextEditor(this.CheckActiveDocument.bind(this));
         //////^^^9^^    ALL TEST CODE
         this._storage = storage;
-        // constructor(context: ExtensionContext) {
         let com = this._storage.get("com");
-        //this._storage.update("com", undefined);
-        //let com: Com[] | undefined = context.globalState.get<Com[]>("com");
-        // console.log("com");
-        // console.log(com);
         if (com !== undefined) {
-            // console.log("com");
             this._RenamedDevices = com;
         }
         this.mDNS_start();
-        // var browser = bonjour.find({ port: 8266 }, this.newService); //var browser = bonjour.find({ type: "_arduino._tcp." }, this.newService); //
-        /*     var browser = bonjour.find({ type: "arduino" }); //,
-    
-        let myatt: any[] = [];
-        let eota: Com[] = [];
-        // browser.on("up", this.newService);
-    
-        browser.on("up", function (service: any) {
-          console.log("service");
-    
-          console.log(service);
-          console.log(service.txt.board);
-    
-          myatt.push(service);
-    
-          let lent = eota.push({
-            Name: "FIRE",
-            Caption: "TRUCK",
-            DeviceID: "TRUCK",
-            Usernamed: "",
-            vendorId: "undefined",
-            productId: "undefined",
-          });
-          console.log(myatt);
-          console.log(lent);
-          //this.refresh();
-        }); */
-        // browser.on("down", function (s: any) {
-        //   console.log(s);
-        //   console.log("down");
-        // });
     }
-    /*   async find(token: CancellationToken): Promise<item[]> {
-      // console.log("inside find:");
-      const services: item[] = [];
-      const bonjour = new _bonjour();
-      const browser = bonjour.find(
-        { type: "arduino", protocol: "tcp" },
-        function (service) {
-          services.push({
-            label: service.name,
-            service,
-          });
-        }
-      );
-  
-      await window.withProgress(
-        {
-          location: ProgressLocation.Notification,
-          title: "Discovered",
-          cancellable: true,
-        },
-        (progress, token) => {
-          const step = 100 / 10;
-          const nobodyMsg = "nobody 😢";
-          progress.report({
-            increment: 0,
-            message: nobodyMsg,
-          });
-  
-          return new Promise((resolve) => {
-            let elapsed = 0;
-            const interval = setInterval(() => {
-              elapsed++;
-              const names = services.map((s) => s.label).join(", ");
-              const message = names || nobodyMsg;
-              progress.report({
-                increment: step,
-                message: message,
-              });
-  
-              if (elapsed === 10) {
-                clearInterval(interval);
-                resolve("resolve");
-              }
-            }, 1000);
-  
-            token.onCancellationRequested(() => {
-              clearInterval(interval);
-              resolve("resolve");
-            });
-          });
-        }
-      );
-  
-      browser.stop();
-      return services;
-    }
-   */
     checkport() {
-        // if (this._clsArduino.checkexist() === true) {
-        // console.log("checkport");
-        // this._clsArduino.watchfile();
         this._clsArduino.setActiveCOMport();
         this._ArdCOM = this._clsArduino.getActiveCOMport();
-        //  this.refresh();
-        // this.refresh();
-        // }
     }
     CheckActiveDocument() {
         //  console.log("CheckActrive");
@@ -418,28 +169,12 @@ class SerialProvider {
         }
     }
     clickedmdns_restart() {
-        // console.log("button _refreshOTA!");
         this._refreshOTA = 6;
         this._OTA = []; //Lets clear our old devices hanging around every once in a while.  You unplugged, right?
         this.refresh();
         this.mDNS_start();
     }
     mDNS_start() {
-        //  bonjour.find({ type: "arduino" }, this.newService);
-        /*     const tokenSrc = new CancellationTokenSource();
-        const services = await this.find(tokenSrc.token);
-    
-        if (services.length === 0) {
-          window.showErrorMessage("There's no peer found");
-          return;
-        }
-    
-        const selected = await window.showQuickPick<item>(services);
-        if (!selected) {
-          return;
-        }
-        console.log(selected.service); */
-        // console.log("starting FIND!");
         //Here so other things can start this and we dont end up with holes?
         clearInterval(this._timerBonjour);
         this._refreshOTA = this._refreshOTA + 1;
@@ -490,19 +225,9 @@ class SerialProvider {
             board: service.txt.board,
           };
          
-          console.log("eota");
-          console.log(eota);
-          //  this.wtf(eota);
-          this._OTA.push(eota);
-          console.log("FARGING ICEHOLE:");
-          console.log(this._OTA);
-          this.refresh();
         }); */
     }
     newService(service) {
-        //console.log(service);
-        //---------------------------------------------  REVISIT THIS!  might have to do on multiple
-        //this._OTA = this._OTA.filter((element) => element.fqdn !== service.fqdn);
         let eota;
         eota = {
             Name: service.name,
@@ -526,23 +251,6 @@ class SerialProvider {
     }
     getTreeItem(element) {
         return element;
-    }
-    async onFileClicked(diffs) {
-        console.log("inside On File Clicked");
-        try {
-            // await this.getdevices;
-            //await showSERS(diffs);
-            //   await new Promise(function(resolve, reject) {
-            //     resolve('success')
-            // });
-            let p = Promise.resolve([1, 2, 3]);
-            await p.then(function (v) {
-                console.log(v[0]); // 1
-            });
-        }
-        catch (error) {
-            console.error(error);
-        }
     }
     /*
   https://stackoverflow.com/questions/42464838/what-is-the-most-efficient-way-to-determine-if-a-collection-of-objects-has-chang/42466050#42466050
@@ -578,36 +286,12 @@ class SerialProvider {
             }
             return result;
         }, []);
-        // console.log("result");
-        // console.log(result);
         return result;
-        /* return curr.reduce(function (result, c) {
-          const p = prev.find(function (item) {
-            //   console.log("c");
-            //   console.log(c);
-            return item.DeviceID === c.DeviceID;
-          });
-          //  console.log("P");
-          //  console.log(p);
-          if (p !== undefined) {
-            console.log(`P====[ ${p} ]`);
-            result.push({
-              event: "added",
-              DeviceID: p.DeviceID,
-              Name: p!.Name,
-              Caption: p!.Caption,
-              Usernamed: p!.Usernamed,
-            });
-          }
-          return result;
-        }, result); */
     }
     refresh() {
-        //console.log("inside refresh");
         this._onDidChangeTreeData.fire(undefined);
     }
     dorefresh() {
-        // window.showInformationMessage("Scanning for Serial port changes.");
         this._timerObject = setInterval(this.getdevices, 800);
         vscode_1.window
             .showInformationMessage("Scanning for Serial port changes.", "Cancel")
@@ -621,38 +305,24 @@ class SerialProvider {
     }
     generatedash(strin) {
         let dash = "";
-        // console.log("----------------");
-        // console.log(this._refreshOTA);
         for (var i = this._refreshOTA + 1; i < 6; i++) {
             dash = dash + "~";
         }
         return strin + dash;
     }
     async getChildren(element) {
-        //console.log("---getChildren-------------");
-        // console.log(element);
-        // console.log("----------------");
-        // let coms = await this.mySerialD().then(function (value) {
-        //   return value;
-        // });
-        // console.log("this._coms");
-        // console.log(this._coms.length);
         let coms = this._coms;
         if (this._coms.length === 0) {
             // console.log("getting some coms");
             coms = await this.mySerialD().then(function (value) {
                 return value;
             });
-            // coms.sort((a, b) =>
-            //   a.Caption.localeCompare(b.Caption, "en", { numeric: true })
-            // );
         }
         let treeSerialD = [];
         if (coms.length !== 0) {
             for (var i = 0; i < coms.length; i++) {
                 //var item = new TreeItem("Foo");
                 let renamed = this._RenamedDevices.filter((element) => element.DeviceID === coms[i].DeviceID);
-                // console.log("cption");
                 //let cption:string = (renamed[0].Usernamed !== undefined)?renamed[0].Usernamed:coms[i].Caption;
                 let cption = coms[i].Caption;
                 if (renamed.length > 0) {
@@ -674,24 +344,6 @@ class SerialProvider {
                 treeSerialD[i].id = i.toString();
                 treeSerialD[i].description = coms[i].Name;
                 treeSerialD[i].tooltip = new vscode_1.MarkdownString(`Click to rename\n___\n- *PORT:=*    **${coms[i].Caption}**\n- *friendlyName:=*  **${coms[i].Name}**`);
-                // let myiconPath = {
-                //   light: join(
-                //     __filename,
-                //     "..",
-                //     "..",
-                //     "resources",
-                //     `${coms[i].Caption === this._ArdCOM ? "selected" : "com"}.svg`
-                //   ),
-                //   dark: join(
-                //     __filename,
-                //     "..",
-                //     "..",
-                //     "resources",
-                //     `${coms[i].Caption === this._ArdCOM ? "selected" : "com"}.svg`
-                //   ),
-                // };
-                //treeSerialD[i].iconPath = myiconPath;
-                //.with({query: `x=${x++}`})
             }
             treeSerialD.sort((a, b) => a.label.localeCompare(b.label, "en", { numeric: true }));
         }
@@ -708,17 +360,6 @@ class SerialProvider {
                             ? renamed[0].Usernamed
                             : this._comChanged[i].Caption;
                 }
-                /*
-                  switch (this._comChanged[i].event) {
-                    case "added":
-                      cption = `+${cption}+`;
-                      break;
-                    case "removed":
-                      cption = `-${cption}-`;
-                      break;
-                  }
-                  */
-                // console.log(cption);
                 treeSerialD[i + plus] = new SerialD(cption, vscode_1.TreeItemCollapsibleState.None, {
                     command: "",
                     title: this._comChanged[i].Caption,
@@ -763,17 +404,6 @@ class SerialProvider {
                             ? renamed[0].Usernamed
                             : this._OTA[i].Caption;
                 }
-                /*
-                  switch (this._comChanged[i].event) {
-                    case "added":
-                      cption = `+${cption}+`;
-                      break;
-                    case "removed":
-                      cption = `-${cption}-`;
-                      break;
-                  }
-                  */
-                //console.log(cption);
                 treeSerialD[i + plus] = new SerialD(cption, vscode_1.TreeItemCollapsibleState.None, {
                     command: "serialdevices.renameEntry",
                     title: this._OTA[i].Caption,
@@ -838,20 +468,11 @@ class SerialD extends vscode_1.TreeItem {
         this.command = command;
         this.type = type;
         this.jsondata = jsondata;
-        /* 	get tooltip(): string {
-              return this.label;
-          }
-      
-          get description(): string {
-              return this.label;
-          } */
         this.iconPath = {
             light: (0, path_1.join)(__filename, "..", "..", "resources", `${this.type}.svg`),
             dark: (0, path_1.join)(__filename, "..", "..", "resources", `${this.type}.svg`),
         };
         this.contextValue = "COM";
-        //this.tooltip = this.label;
-        // this.description = this.label + ' test';
     }
 }
 exports.SerialD = SerialD;
@@ -862,11 +483,7 @@ class Arduino_JSON_Settings {
         this._arduinoConfigPath = "";
         this._COMActive = "";
     }
-    // private ARDUINO_CONFIG_FILE = path.join(".vscode", "settings.json");
-    //
     setActiveURI(acturi) {
-        //console.log("setActuveIRI");
-        //console.log(acturi);
         this._ActiveURI = acturi.fsPath;
     }
     getActiveCOMport() {
@@ -888,7 +505,6 @@ class Arduino_JSON_Settings {
         this._refreshCallbacks = callback;
     }
     checkexist() {
-        // console.log("checkexist");
         if (this._ActiveURI !== undefined) {
             this._arduinoConfigPath = path.join(this._ActiveURI.toString(), ARDUINO_CONFIG_FILE);
             if (fs.existsSync(this._arduinoConfigPath)) {
@@ -904,112 +520,6 @@ class Arduino_JSON_Settings {
             }
         }
         return false;
-        /*     const workspaceFolders = workspace.workspaceFolders;
-        console.log(workspaceFolders);
-        window.showInformationMessage(
-          `workspaceFolderPathSSSS: ${workspace.workspaceFolders}`
-        );
-        //window.activeTextEditor.document.uri.fsPath
-        //workspace.getWorkspaceFolder()
-        if (!workspaceFolders || workspaceFolders.length === 0) {
-          return false;
-        }
-        if (workspaceFolders !== undefined) {
-          console.log(workspace.workspaceFolders![0].uri.path);
-          window.showInformationMessage(
-            `workspaceFolderPath: ${workspace.workspaceFolders![0].uri.path}`
-          );
-          window.showInformationMessage(
-            `workspaceFolderPath: ${workspace.workspaceFolders![0].uri.fsPath}`
-          );
-          // > /c:/Users/name/Documents/Notes
-          console.log(workspace.workspaceFolders![0].uri.fsPath);
-          //  > c:\Users\name\Documents\Notes
-        }
-    
-        if (workspaceFolders !== undefined) {
-          for (const workspaceFolder of workspaceFolders) {
-            const workspaceFolderPath = workspaceFolder.uri.fsPath;
-            const arduinoConfigPath = path.join(
-              workspaceFolderPath,
-              ARDUINO_CONFIG_FILE
-            );
-            if (fs.existsSync(arduinoConfigPath)) {
-              console.log(workspaceFolderPath);
-              window.showInformationMessage(
-                `workspaceFolderPath: ${workspaceFolderPath}`
-              );
-              const arduinoConfigPath = path.join(
-                workspaceFolderPath,
-                ARDUINO_CONFIG_FILE
-              );
-    
-              window.showInformationMessage(
-                `workspaceFolderPath: ${arduinoConfigPath}`
-              );
-              let ardpath =
-                "c:\\Users\\treya\\Documents\\Arduino\\ESP32_Wellbeing\\.vscode\\arduino.json";
-              const settings = this.tryParseJSON(
-                fs.readFileSync(arduinoConfigPath, "utf8")
-              );
-              console.log(settings);
-            }
-          }
-        } */
-        /*
-        // Single active editor. Editors have a `.document` property
-    vscode.window.activeTextEditor
-    
-    // All showing text editors. For a split view, there are two active editors
-    vscode.window.visibleTextEditors
-    
-    // All open documents that vscode knows about. Do not have to be showing
-    vscode.workspace.textDocuments
-    */
-    }
-    watchfileNOTUSED() {
-        if (!fs.existsSync(this._arduinoConfigPath)) {
-            vscode_1.window.showInformationMessage(`workspaceFolderPath_checkexist: ${this._arduinoConfigPath}`);
-            return false;
-        }
-        //  if (this.checkexist() === true) {
-        console.log("IM WATCHING-LEFT");
-        if (this._arduinoConfigPath.toString() === "WTF") {
-            // let newwatcher = workspace.createFileSystemWatcher("**/arduino.json");
-            // newwatcher.onDidChange((uri) => console.log("change to " + uri));
-            console.log(this._arduinoConfigPath.toString());
-            //  let folders = workspace.workspaceFolders;
-            // console.log(folders);
-            //  if (folders) {
-            // let bp = new RelativePattern(
-            //   `${folders[0].uri.toString()}/.vscode`,
-            //   "arduino.json"
-            // );
-            // console.log(bp);
-            this._watcher = vscode_1.workspace.createFileSystemWatcher("**/arduino.json" // this._arduinoConfigPath.toString()
-            );
-            //this._watcher.ignoreChangeEvents = false;
-            this._watcher.onDidChange(() => this.setActiveCOMport());
-        }
-        // this._watcher.onDidChange(() => {
-        //   window.showInformationMessage("change applied!"); //In my opinion this should be called
-        // });
-        // console.log(this._watcher);
-        // }
-        //console.log(RelativePattern(folders[0],"test.json"));
-        // if (folders) {
-        //   let watcher = workspace.createFileSystemWatcher(
-        //     new RelativePattern(folders[0], "*.txt")
-        //   );
-        //   watcher.onDidCreate((uri) => console.log(`created ${uri}`));
-        // }
-        // }
-        // let ardpath =
-        //   "c:\\Users\\treya\\Documents\\Arduino\\ESP32_Wellbeing\\.vscode\\arduino.json";
-        // const settings = this.tryParseJSON(fs.readFileSync(ardpath, "utf8"));
-        // console.log(settings);
-        // console.log(settings.port);
-        // this._ArdJSON = settings.port;
     }
     // public dispose() {
     //   if (this._watcher) {
