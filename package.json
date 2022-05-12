@@ -4,7 +4,7 @@
   "description": "Scan for Serial Devices. Newly added over the air!",
   "icon": "images/SerialScanner.png",
   "publisher": "Trey Aughenbaugh",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "engines": {
     "vscode": "^1.66.0"
   },

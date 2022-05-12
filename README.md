@@ -2,8 +2,9 @@
 
 This is useful for microcontroller development. It lists the Serial Device and allows for giving them an alternate name. So instead of seeing COM3, you can rename it to ESP32_SENSOR. Since Com port numbers change, it uses the DeviceID/pnpid to be more accurate for the search when checking for name.
 NEW ADDITION! I added a mDNS discovery to pull in Arduino OTA devices.
-When the Extension is running, it starts the discovery. Since OTA seem to be erratic, I dont clear the list while its dicovering and I stop the broswer and restart it every 60 seconds. The reason for this is due to found devices may not be found again during that 60 seconds if removed.  
+When the Extension is running, it starts the discovery. Since OTA seem to be erratic, I dont clear the list while its dicovering and I stop the broswer and restart it every 60 seconds. The reason for this is due to found devices may not be found again during that 60 seconds of being removed.  
 After 6 mimutes of scanning, it clears the list and starts again. This removes stale OTA devices. Pressing the -=Network Devices=- item, forces a clear and refresh immediately.
+I just added the ability for it to detect the COM port listed in the arduino.json file. It now highlights the one currently being used.
 
 ## Features
 
@@ -27,6 +28,7 @@ When a Device is removed, it doesn't disappear from the list right away but show
 - Can remove a renamed port by clicking the X.
 - Hovering over COM device shows the Actual com details.
 - Hovering over the OTA shows the OTA details. Full Domain Name, Board Type, etc.
+- Checks the arduino.json file for the current COM port being used, shows an icon next to the active port.
 
 ![COMPROGRAMMING](./assets/SerialDevices.gif)
 
@@ -34,7 +36,7 @@ When a Device is removed, it doesn't disappear from the list right away but show
 
 - `Serial Devies: Scan for changes` Same as pressing the refresh button on the page. Scans for device change or until time-out.
 - `Serial Devies: Refresh Devices` Does a 1 time scan of Serial Devices.
-- `Serial Devies: Refresh MDNS` Forces a refresh of the mDNS discovery. This is always running, but will clear the list if needed.
+- `Serial Devies: Refresh MDNS` Forces a refresh of the mDNS discovery. This is always running, but will clear the list if needed and restart it.
 
 ## Info / TODO
 
@@ -45,6 +47,8 @@ When a Device is removed, it doesn't disappear from the list right away but show
 - Maybe allow for certain serial device to be hidden from list.
 
 - Would be nice if Arduino extension gave the USB port it is connected to and would allow to be set by another extension.
+
+- Maybe use the arduino.json fall for use in the COM details and auto re-label the port based on the projects name.
 
 ## HELP
 
