@@ -3,8 +3,8 @@
   "displayName": "Serial Devices",
   "description": "Scan for Serial Devices. Newly added over the air!",
   "icon": "images/SerialScanner.png",
-  "publisher": "TreyAughenbaugh",
-  "version": "0.2.1",
+  "publisher": "Trey Aughenbaugh",
+  "version": "0.2.3",
   "engines": {
     "vscode": "^1.66.0"
   },
@@ -43,7 +43,7 @@
       {
         "command": "serialdevices.refreshEntry",
         "when": "",
-        "title": "Serial Devies: Scan for changes.",
+        "title": "Serial Devies: Scan for changes",
         "icon": {
           "light": "./resources/refresh.svg",
           "dark": "./resources/refresh.svg"
@@ -119,6 +119,7 @@
   },
   "dependencies": {
     "bonjour-service": "^1.0.12",
+    "file-uri-to-path": "^2.0.0",
     "serialport": "^10.4.0"
   }
 }

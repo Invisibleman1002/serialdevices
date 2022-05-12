@@ -43,6 +43,12 @@ export function activate(context: ExtensionContext) {
     )
   );
 
+  // context.subscriptions.push(
+  //   commands.registerCommand("serialdevices.checkdocument", () =>
+  //     serProvider.CheckActiveDocument()
+  //   )
+  // );
+
   // ! this wont work!  I mean, it pops open the Serial Port Selection but wont select it.
   commands.registerCommand("serialdevices.arduino_sp", (node: SerialD) => {
     // const valueOfVid = parseInt("0403", 16);
@@ -85,6 +91,9 @@ export function activate(context: ExtensionContext) {
   commands.registerCommand("serialdevices.restartmdns", () =>
     serProvider.clickedmdns_restart()
   );
+  // commands.registerCommand("serialdevices.refreshtree", () =>
+  //   serProvider.refresh()
+  // );
 
   //see output
   //commands.registerCommand('serialdevices.renameEntry', (item:TreeItem)=> {console.log(item);});

@@ -18,6 +18,11 @@ function activate(context) {
     context.subscriptions.push(vscode_1.commands.registerCommand("serialdevices.getsomedevices", serProvider.getdevices));
     context.subscriptions.push(vscode_1.commands.registerCommand("serialdevices.refreshEntry", () => serProvider.dorefresh()));
     context.subscriptions.push(vscode_1.commands.registerCommand("serialdevices.refreshmdns", () => serProvider.mDNS_start()));
+    // context.subscriptions.push(
+    //   commands.registerCommand("serialdevices.checkdocument", () =>
+    //     serProvider.CheckActiveDocument()
+    //   )
+    // );
     // ! this wont work!  I mean, it pops open the Serial Port Selection but wont select it.
     vscode_1.commands.registerCommand("serialdevices.arduino_sp", (node) => {
         // const valueOfVid = parseInt("0403", 16);
@@ -43,6 +48,9 @@ function activate(context) {
     vscode_1.commands.registerCommand("serialdevices.renameEntry", (item) => serProvider.tryrename(item));
     vscode_1.commands.registerCommand("serialdevices.unrename", (item) => serProvider.removename(item));
     vscode_1.commands.registerCommand("serialdevices.restartmdns", () => serProvider.clickedmdns_restart());
+    // commands.registerCommand("serialdevices.refreshtree", () =>
+    //   serProvider.refresh()
+    // );
     //see output
     //commands.registerCommand('serialdevices.renameEntry', (item:TreeItem)=> {console.log(item);});
     //commands.executeCommand('serialdevices.refresh', 'shouldRefresh', true);
