@@ -36,7 +36,7 @@ When a Device is removed, it doesn't disappear from the list right away but show
 
 ## Example of the additional arduino.json com port read and Over teh Air device discovery.
 
-![COMPROGRAMMING](./assets/SerialOTA.gif)
+![COMPROGRAMMING](./assets/Serial_OTA.gif)
 
 ## Commands
 
