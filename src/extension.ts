@@ -1,31 +1,13 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 //import * as vscode from 'vscode';
-import {
-  ExtensionContext,
-  window,
-  commands,
-  // env,
-  // Clipboard,
-  // TreeItem,
-  // ConfigurationTarget,
-} from "vscode";
+import { ExtensionContext, window, commands } from "vscode";
 import { SerialProvider, SerialD } from "./serialDeviceprovider";
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
 export function activate(context: ExtensionContext) {
-  // Use the console to output diagnostic information (console.log) and errors (console.error)
-  // This line of code will only be executed once when your extension is activated
-  //console.log('Congratulations, your extension "serialdevices" is now active!');
-
   const serProvider = new SerialProvider(context.globalState);
   window.registerTreeDataProvider("SerialDeviceProviderService", serProvider);
 
-  commands.registerCommand(
-    "serialdevices.DevicesSerial",
-    serProvider.onFileClicked
-  );
   context.subscriptions.push(
     commands.registerCommand(
       "serialdevices.getsomedevices",
@@ -42,12 +24,6 @@ export function activate(context: ExtensionContext) {
       serProvider.mDNS_start()
     )
   );
-
-  // context.subscriptions.push(
-  //   commands.registerCommand("serialdevices.checkdocument", () =>
-  //     serProvider.CheckActiveDocument()
-  //   )
-  // );
 
   // ! this wont work!  I mean, it pops open the Serial Port Selection but wont select it.
   commands.registerCommand("serialdevices.arduino_sp", (node: SerialD) => {
@@ -91,23 +67,6 @@ export function activate(context: ExtensionContext) {
   commands.registerCommand("serialdevices.restartmdns", () =>
     serProvider.clickedmdns_restart()
   );
-  // commands.registerCommand("serialdevices.refreshtree", () =>
-  //   serProvider.refresh()
-  // );
-
-  //see output
-  //commands.registerCommand('serialdevices.renameEntry', (item:TreeItem)=> {console.log(item);});
-  //commands.executeCommand('serialdevices.refresh', 'shouldRefresh', true);
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with registerCommand
-  // The commandId parameter must match the command field in package.json
-  // let disposable = commands.registerCommand("serialdevices.helloWorld", () => {
-  //   // The code you place here will be executed every time your command is executed
-  //   // Display a message box to the user
-  //   window.showInformationMessage("Hello World from SerialDevices!");
-  // });
-
-  // context.subscriptions.push(disposable);
 }
 
 async function sendClipboard() {
@@ -116,7 +75,7 @@ async function sendClipboard() {
 }
 
 // this method is called when your extension is deactivated
-export function deactivate(context: ExtensionContext) {
+export function deactivate() {
   /* This does not work!  Extension can be disabled or uninstalled with out a question.
   I would like to clean up the "database".  Anyone?
   const serProvider = new SerialProvider(context.globalState);
