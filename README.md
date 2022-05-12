@@ -105,3 +105,9 @@ Initial version soon to be released after more cleanup of the code. This was my 
 ### 1.0.0
 
 Initial release
+
+# THANK YOU
+
+Trey
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Q5Q510IO8)
