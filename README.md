@@ -6,6 +6,9 @@ When the Extension is running, it starts the discovery. Since OTA seem to be err
 After 6 mimutes of scanning, it clears the list and starts again. This removes stale OTA devices. Pressing the -=Network Devices=- item, forces a clear and refresh immediately.
 I just added the ability for it to detect the COM port listed in the arduino.json file. It now highlights the one currently being used.
 
+![Devices](./assets/SerialDevices.png)
+![DeviceRemoved](./assets/removed.png)
+
 ## Features
 
 Pressing the scan button starts a serial device scan. It will continue to run for about 15 seconds or until a device has been plugged-in or removed.  
@@ -36,7 +39,7 @@ When a Device is removed, it doesn't disappear from the list right away but show
 
 ## Example of the additional arduino.json com port read and Over the Air device discovery.
 
-![COMPROGRAMMING](./assets/Serial_OTA.gif)
+![OTAROGRAMMING](./assets/Serial_OTA.gif)
 
 ## Commands
 
