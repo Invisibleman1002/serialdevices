@@ -30,7 +30,13 @@ When a Device is removed, it doesn't disappear from the list right away but show
 - Hovering over the OTA shows the OTA details. Full Domain Name, Board Type, etc.
 - Checks the arduino.json file for the current COM port being used, shows an icon next to the active port.
 
+## Example of the Serial Device scanning
+
 ![COMPROGRAMMING](./assets/SerialDevices.gif)
+
+## Example of the additional arduino.json com port read and Over teh Air device discovery.
+
+![COMPROGRAMMING](./assets/SerialOTA.gif)
 
 ## Commands
 
