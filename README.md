@@ -8,8 +8,8 @@ After 6 minutes of scanning, it clears the list and starts again. This removes s
 
 ANOTHER NEW ADDITION! I just added the ability for it to detect the COM port listed in the arduino.json file. It now highlights the one currently being used.
 
-![Devices](https://github.com/Invisibleman1002/serialdevices/blob/master/assets/SerialDevices.png)
-![DeviceRemoved](https://github.com/Invisibleman1002/serialdevices/blob/master/assets/Removed.png)
+![Devices](./assets/SerialDevices.png)
+![DeviceRemoved](./assets/Removed.png)
 
 ## Features
 
@@ -37,11 +37,11 @@ When a device is removed, it doesn't disappear from the list right away but show
 
 ## Example of the Serial Device scanning
 
-![COMPROGRAMMING](https://github.com/Invisibleman1002/serialdevices/blob/master/assets/SerialDevices.gif)
+![COMPROGRAMMING](./assets/SerialDevices.gif)
 
 ## Example of the additional arduino.json com port read and Over the Air device discovery.
 
-![OTAROGRAMMING](https://github.com/Invisibleman1002/serialdevices/blob/master/assets/Serial_OTA.gif)
+![OTAROGRAMMING](./assets/Serial_OTA.gif)
 
 ## Commands
 
@@ -112,4 +112,4 @@ Initial release - I want to make some updates to the arduino.json file reading b
 
 Trey
 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Q5Q510IO8)
+[![ko-fi](https://cdn.ko-fi.com/cdn/kofi2.png?v=3)](https://ko-fi.com/Q5Q510IO8)
