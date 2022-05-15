@@ -6,17 +6,8 @@ const vscode_1 = require("vscode");
 const path_1 = require("path");
 const path = require("path");
 const fs = require("fs");
-//import { spawn } from "child_process";
 const serialport_1 = require("serialport");
-//import { Server } from "http";
-//import { bonjour } from "bonjour";
-//import bonjour = require('bonjour')();
-//const bonjour = require("bonjour")();
-//import _bonjour from "bonjour";
-//const bonjour = _bonjour();
 const bonjour_service_1 = require("bonjour-service");
-//import bonjour = require("bonjour");
-//const bonjour = new _bonjour();
 class SerialProvider {
     constructor(storage) {
         this._onDidChangeTreeData = new vscode_1.EventEmitter();

@@ -20,21 +20,11 @@ import {
   // CancellationTokenSource,
   //ProgressLocation,
 } from "vscode";
-import { join, resolve } from "path";
+import { join } from "path";
 import * as path from "path";
 import * as fs from "fs";
-//import { spawn } from "child_process";
 import { SerialPort } from "serialport";
-//import { Server } from "http";
-//import { bonjour } from "bonjour";
-//import bonjour = require('bonjour')();
-//const bonjour = require("bonjour")();
-//import _bonjour from "bonjour";
-//const bonjour = _bonjour();
 import _bonjour, { Bonjour } from "bonjour-service";
-//import bonjour = require("bonjour");
-
-//const bonjour = new _bonjour();
 
 export class SerialProvider implements TreeDataProvider<SerialD> {
   private _onDidChangeTreeData: EventEmitter<any | undefined | null | void> =
@@ -647,7 +637,6 @@ export class SerialD extends TreeItem {
 
 const ARDUINO_CONFIG_FILE = path.join(".vscode", "arduino.json");
 class Arduino_JSON_Settings {
-  private _watcher?: FileSystemWatcher;
   private _ActiveURI: string = "";
   private _arduinoConfigPath: fs.PathLike = "";
   private _COMActive: string = "";
