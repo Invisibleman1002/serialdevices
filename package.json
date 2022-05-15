@@ -3,7 +3,7 @@
   "displayName": "Serial Devices",
   "description": "Scan for Serial Devices. Newly added over the air!  This helps make it easier to deal with lots of COM ports at once.",
   "icon": "images/SerialScanner.png",
-  "publisher": "Trey Aughenbaugh",
+  "publisher": "Invisibleman1002",
   "version": "1.0.0",
   "engines": {
     "vscode": "^1.66.0"
