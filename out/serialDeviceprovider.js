@@ -20,6 +20,7 @@ class SerialProvider {
         this._comChanged = [];
         this._OTA = [];
         this._ArdCOM = "";
+        this._ArdSKETCH = "";
         this._bonjour = new bonjour_service_1.default();
         this._clsArduino = new Arduino_JSON_Settings();
         /*
@@ -101,27 +102,27 @@ class SerialProvider {
                 }
             }
             this._comChanged = this.f(old_coms, this._coms);
+            this.Storage_Refresh();
             this.refresh();
         };
         let newwatcher = vscode_1.workspace.createFileSystemWatcher("**/arduino.json");
         newwatcher.onDidChange((uri) => {
             this._clsArduino.setActiveCOMport();
             this._ArdCOM = this._clsArduino.getActiveCOMport();
+            this._ArdSKETCH = this._clsArduino.getActivesketch();
         }); //this.checkport.bind(this));
         this.checkport();
         this._clsArduino.registerRefresh(() => this.refresh());
         vscode_1.window.onDidChangeActiveTextEditor(this.CheckActiveDocument.bind(this));
         //////^^^9^^    ALL TEST CODE
         this._storage = storage;
-        let com = this._storage.get("com");
-        if (com !== undefined) {
-            this._RenamedDevices = com;
-        }
+        this.Storage_Refresh();
         this.mDNS_start();
     }
     checkport() {
         this._clsArduino.setActiveCOMport();
         this._ArdCOM = this._clsArduino.getActiveCOMport();
+        this._ArdSKETCH = this._clsArduino.getActivesketch();
     }
     CheckActiveDocument() {
         //  console.log("CheckActrive");
@@ -148,6 +149,7 @@ class SerialProvider {
                 // this._clsArduino.watchfile();
                 this._clsArduino.setActiveCOMport();
                 this._ArdCOM = this._clsArduino.getActiveCOMport();
+                this._ArdSKETCH = this._clsArduino.getActivesketch();
                 this.refresh();
             }
             // console.log(this._clsArduino);
@@ -165,6 +167,12 @@ class SerialProvider {
         this.refresh();
         this.mDNS_start();
     }
+    Storage_Refresh() {
+        let com = this._storage.get("com");
+        if (com !== undefined) {
+            this._RenamedDevices = com;
+        }
+    }
     mDNS_start() {
         //Here so other things can start this and we dont end up with holes?
         clearInterval(this._timerBonjour);
@@ -175,6 +183,7 @@ class SerialProvider {
                     resolve(true);
                 }, 3000);
             }));
+            this.Storage_Refresh();
             this._refreshOTA = 0;
             this._OTA = []; //Lets clear our old devices hanging around every once in a while.  You unplugged, right?
         }
@@ -283,13 +292,13 @@ class SerialProvider {
         this._onDidChangeTreeData.fire(undefined);
     }
     dorefresh() {
+        this.clickedmdns_restart();
+        clearInterval(this._timerObject);
         this._timerObject = setInterval(this.getdevices, 800);
         vscode_1.window
             .showInformationMessage("Scanning for Serial port changes.", "Cancel")
             .then((selection) => {
-            console.log(selection);
             if (selection === "Cancel") {
-                console.log("Cancel Cancel");
                 clearInterval(this._timerObject);
             }
         });
@@ -333,7 +342,10 @@ class SerialProvider {
                 }, coms[i].Caption === this._ArdCOM ? "selected" : "com", coms[i]);
                 treeSerialD[i].command.arguments = [treeSerialD[i]];
                 treeSerialD[i].id = i.toString();
-                treeSerialD[i].description = coms[i].Name;
+                let Desc = this._ArdSKETCH !== "" && coms[i].Caption === this._ArdCOM
+                    ? `${this._ArdSKETCH} (${coms[i].Caption})`
+                    : coms[i].Name;
+                treeSerialD[i].description = Desc; //coms[i].Name;
                 treeSerialD[i].tooltip = new vscode_1.MarkdownString(`Click to rename\n___\n- *PORT:=*    **${coms[i].Caption}**\n- *friendlyName:=*  **${coms[i].Name}**`);
             }
             treeSerialD.sort((a, b) => a.label.localeCompare(b.label, "en", { numeric: true }));
@@ -473,6 +485,7 @@ class Arduino_JSON_Settings {
         this._ActiveURI = "";
         this._arduinoConfigPath = "";
         this._COMActive = "";
+        this._SKETCHActive = "";
     }
     setActiveURI(acturi) {
         this._ActiveURI = acturi.fsPath;
@@ -480,12 +493,16 @@ class Arduino_JSON_Settings {
     getActiveCOMport() {
         return this._COMActive;
     }
+    getActivesketch() {
+        return this._SKETCHActive;
+    }
     setActiveCOMport() {
         //console.log("setActiveComPoART");
         if (fs.existsSync(this._arduinoConfigPath)) {
             const settings = this.tryParseJSON(fs.readFileSync(this._arduinoConfigPath, "utf8"));
             //console.log(settings);
             this._COMActive = settings.port;
+            this._SKETCHActive = settings.sketch;
             //Maybe grab the Board and other details and place in the Extended options.
             //commands.executeCommand("serialdevices.refreshtree"); //Replaced this with a callback.
             // console.log("CALLBACK");

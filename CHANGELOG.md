@@ -1,9 +1,23 @@
 # Change Log
 
-All notable changes to the "serialdevices" extension will be documented in this file.
+## [unreleased]
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+- Do a better job at getting the arduino.json on intial startup.
 
-## [Unreleased]
+## [1.0.2] - 05/16/2022
 
-- Initial release
+### Added
+
+- Doing a Serial Scan also refreshes the OTA list and restarts a new scan.
+- The COM description now shows the name of the sketch.
+
+## [1.0.1] - 05/15/2022
+
+### Added
+
+- When OTA does a refresh, it also reloads the renamed database. So if you renamed a Device in another VC Code window, it will eventually show up in other windows as well. You can manually force the refresh by using the command: `Serial ​Devices: Refresh MDNS`, by clicking `-=Refresh Network=-`, or by Staring another Serial scan.
+- Created the change log file.
+
+## [1.0.0] - 05/15/2022
+
+- Initial release - I want to make some updates to the arduino.json file reading but think this is ready for others to play with.

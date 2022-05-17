@@ -1,10 +1,10 @@
 {
   "name": "serialdevices",
   "displayName": "Serial Devices",
-  "description": "Scan for Serial Devices. Newly added over the air!  This helps make it easier to deal with lots of COM ports at once.",
+  "description": "​Scan for Serial Device while OTA device scan happens automatically.  A useful tool for dealing with multiple microcontroller com ports.",
   "icon": "images/SerialScanner.png",
   "publisher": "Invisibleman1002",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "engines": {
     "vscode": "^1.66.0"
   },
@@ -21,6 +21,7 @@
     "microcontroller",
     "serial",
     "usb",
+    "com",
     "ota",
     "over the air"
   ],

@@ -43,6 +43,7 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
   private _OTA: OTAPlus[] = [];
   private _storage: Memento;
   private _ArdCOM: string = "";
+  private _ArdSKETCH: string = "";
   private _bonjour: Bonjour = new _bonjour();
   private _clsArduino: Arduino_JSON_Settings = new Arduino_JSON_Settings();
 
@@ -51,6 +52,7 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
     newwatcher.onDidChange((uri) => {
       this._clsArduino.setActiveCOMport();
       this._ArdCOM = this._clsArduino.getActiveCOMport();
+      this._ArdSKETCH = this._clsArduino.getActivesketch();
     }); //this.checkport.bind(this));
     this.checkport();
     this._clsArduino.registerRefresh(() => this.refresh());
@@ -58,16 +60,14 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
     //////^^^9^^    ALL TEST CODE
     this._storage = storage;
 
-    let com: Com[] | undefined = this._storage.get<Com[]>("com");
-    if (com !== undefined) {
-      this._RenamedDevices = com!;
-    }
+    this.Storage_Refresh();
     this.mDNS_start();
   }
 
   checkport(): void {
     this._clsArduino.setActiveCOMport();
     this._ArdCOM = this._clsArduino.getActiveCOMport();
+    this._ArdSKETCH = this._clsArduino.getActivesketch();
   }
   CheckActiveDocument(): void {
     //  console.log("CheckActrive");
@@ -99,6 +99,7 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
         // this._clsArduino.watchfile();
         this._clsArduino.setActiveCOMport();
         this._ArdCOM = this._clsArduino.getActiveCOMport();
+        this._ArdSKETCH = this._clsArduino.getActivesketch();
         this.refresh();
       }
       // console.log(this._clsArduino);
@@ -118,6 +119,13 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
     this.mDNS_start();
   }
 
+  Storage_Refresh(): void {
+    let com: Com[] | undefined = this._storage.get<Com[]>("com");
+    if (com !== undefined) {
+      this._RenamedDevices = com!;
+    }
+  }
+
   mDNS_start(): void {
     //Here so other things can start this and we dont end up with holes?
     clearInterval(this._timerBonjour);
@@ -133,6 +141,7 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
           }, 3000);
         })
       );
+      this.Storage_Refresh();
       this._refreshOTA = 0;
       this._OTA = []; //Lets clear our old devices hanging around every once in a while.  You unplugged, right?
     }
@@ -146,6 +155,7 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
     this._timerBonjour = setInterval(() => {
       clearInterval(this._timerBonjour);
       browser.stop();
+
       this.mDNS_start();
     }, 60000);
     //RARE anything says its down.  all my OTA just disappear because unplugged.
@@ -344,7 +354,7 @@ https://stackoverflow.com/questions/42464838/what-is-the-most-efficient-way-to-d
     }
 
     this._comChanged = this.f(old_coms, this._coms);
-
+    this.Storage_Refresh();
     this.refresh();
   };
 
@@ -353,14 +363,14 @@ https://stackoverflow.com/questions/42464838/what-is-the-most-efficient-way-to-d
   }
 
   dorefresh(): void {
+    this.clickedmdns_restart();
+    clearInterval(this._timerObject);
     this._timerObject = setInterval(this.getdevices, 800);
 
     window
       .showInformationMessage("Scanning for Serial port changes.", "Cancel")
       .then((selection) => {
-        console.log(selection);
         if (selection === "Cancel") {
-          console.log("Cancel Cancel");
           clearInterval(this._timerObject);
         }
       });
@@ -417,7 +427,11 @@ https://stackoverflow.com/questions/42464838/what-is-the-most-efficient-way-to-d
         );
         treeSerialD[i].command.arguments = [treeSerialD[i]];
         treeSerialD[i].id = i.toString();
-        treeSerialD[i].description = coms[i].Name;
+        let Desc: string =
+          this._ArdSKETCH !== "" && coms[i].Caption === this._ArdCOM
+            ? `${this._ArdSKETCH} (${coms[i].Caption})`
+            : coms[i].Name;
+        treeSerialD[i].description = Desc; //coms[i].Name;
         treeSerialD[i].tooltip = new MarkdownString(
           `Click to rename\n___\n- *PORT:=*    **${coms[i].Caption}**\n- *friendlyName:=*  **${coms[i].Name}**`
         );
@@ -640,6 +654,7 @@ class Arduino_JSON_Settings {
   private _ActiveURI: string = "";
   private _arduinoConfigPath: fs.PathLike = "";
   private _COMActive: string = "";
+  private _SKETCHActive: string = "";
   private _refreshCallbacks: any;
 
   setActiveURI(acturi: Uri): void {
@@ -647,6 +662,9 @@ class Arduino_JSON_Settings {
   }
   getActiveCOMport(): string {
     return this._COMActive;
+  }
+  getActivesketch(): string {
+    return this._SKETCHActive;
   }
 
   setActiveCOMport(): void {
@@ -657,6 +675,7 @@ class Arduino_JSON_Settings {
       );
       //console.log(settings);
       this._COMActive = settings.port;
+      this._SKETCHActive = settings.sketch;
       //Maybe grab the Board and other details and place in the Extended options.
       //commands.executeCommand("serialdevices.refreshtree"); //Replaced this with a callback.
       // console.log("CALLBACK");
