@@ -673,9 +673,12 @@ class Arduino_JSON_Settings {
       const settings = this.tryParseJSON(
         fs.readFileSync(this._arduinoConfigPath, "utf8")
       );
-      //console.log(settings);
-      this._COMActive = settings.port;
-      this._SKETCHActive = settings.sketch;
+      // console.log(settings);
+      this._COMActive = settings.port !== undefined ? settings.port : "";
+      this._SKETCHActive =
+        settings.sketch !== undefined
+          ? settings.sketch.toString().replace(/.ino/gi, "")
+          : "";
       //Maybe grab the Board and other details and place in the Extended options.
       //commands.executeCommand("serialdevices.refreshtree"); //Replaced this with a callback.
       // console.log("CALLBACK");

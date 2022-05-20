@@ -70,7 +70,7 @@ When a device is removed, it doesn't disappear from the list right away but show
 
 - I used this project to create my animated gifs. https://marketplace.visualstudio.com/items?itemName=arcsine.chronicler
   - Chronicler will create animated gifs perfectly, but I wanted to add some text to the video.
-- I also VSDC Free Video Editor. I used to use HITFILM Express but now it says "hitfilm support for AVC / h264 video requires a licensed version of hitfilm pro". I can't see buying a pro version just to add text to a video when it used to be free. https://www.videosoftdev.com/how-to-add-text-to-your-video-or-an-image
+- I also used VSDC Free Video Editor. I used to use HITFILM Express but now it says "hitfilm support for AVC / h264 video requires a licensed version of hitfilm pro". I can't see buying a pro version just to add text to a video when it used to be free. https://www.videosoftdev.com/how-to-add-text-to-your-video-or-an-image
 
 - Here are the commands I used to generate the animated GIF after I edited the video.
 
@@ -94,7 +94,7 @@ The above command actually runs this command:
 
 `public async selectSerialPort(vid: string, pid: string)`
 
-Sadly it does not work, just opens the quick pick but doesn't use the details to select the port. I know paste in the selected COM port.
+Sadly it does not work, just opens the quick pick but doesn't use the details to select the port. I now paste in the selected COM port.
 
 ## Extension Settings
 
@@ -107,6 +107,7 @@ This was my first Visual Studio Code extension and it changed so many times.
 
 ### Versions
 
+- 1.0.3 05/17/2022 - Dropped `.ino` from the sketch name. Added some _undefined_ checks in case of new arduino.json file.
 - 1.0.2 05/16/2022 - Doing a Serial Scan also refreshes the OTA list and restarts a new scan. The COM description now shows the name of the sketch.
 - 1.0.1 05/15/2022 - When OTA does a refresh, it also reloads the renamed database. So if you renamed a Device in another VC Code window, it will eventually show up in other windows as well. You can manually force the refresh by using the command: `Serial ​Devices: Refresh MDNS`, by clicking `-=Refresh Network=-`, or by Staring another Serial scan.
 - 1.0.0 Initial release - I want to make some updates to the arduino.json file reading but think this is ready for others to play with.

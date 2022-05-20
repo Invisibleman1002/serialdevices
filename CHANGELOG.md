@@ -4,6 +4,13 @@
 
 - Do a better job at getting the arduino.json on intial startup.
 
+## [1.0.3] - 05/17/2022
+
+### Added
+
+- Added some undefined checks in case of new arduino.json file.
+- Dropped `.ino` from the sketch name.
+
 ## [1.0.2] - 05/16/2022
 
 ### Added

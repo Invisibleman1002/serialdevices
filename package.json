@@ -4,7 +4,7 @@
   "description": "​Scan for Serial Device while OTA device scan happens automatically.  A useful tool for dealing with multiple microcontroller com ports.",
   "icon": "images/SerialScanner.png",
   "publisher": "Invisibleman1002",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "engines": {
     "vscode": "^1.66.0"
   },
