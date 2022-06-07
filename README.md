@@ -6,8 +6,9 @@ I've tested on these Arduino Telnet Libraries:
 
 - https://github.com/JAndrassy/TelnetStream
 - https://github.com/LennartHennigs/ESPTelnet
+- https://forum.arduino.cc/t/converting-a-serial-menu-to-telnet/894145/66 _Post #66 here talks about how to accept setup command from a telnet interface._
 
-![TELNET](./assets/Telnet.gif)
+  ![TELNET](./assets/Telnet.gif)
 
 This is useful for microcontroller development. It lists the Serial Device and allows for giving them an alternate name. So instead of seeing COM3, you can rename it to ESP32_SENSOR.
 
