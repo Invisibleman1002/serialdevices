@@ -747,24 +747,17 @@ class Arduino_JSON_Settings {
 }
 
 /**
-
+  Terminally:  Create the node telnet connection.
  */
 class Terminally {
   private _Terminal: Terminal;
   /**
- 
+    Start up node telnet connection and create a terminal window for it.
    */
   constructor(port: number, host: string, name: string) {
-    //const clientFile = resolve(__dirname, "socks.js");
     const clientFile = resolve(__dirname, "sockettome.js");
-    //const clientFile = resolve(__dirname, "../src/socks.js");
     const shellArgs: string[] = [clientFile, port.toString(), host];
     const shellPath: string = "node";
-    // const name: string = "DoorAlert";
-
-    // this.log.debug("exec: node", shellArgs.join(" "));
-    //console.log(shellPath);
-    //console.log(shellArgs);
     this._Terminal = window.createTerminal({
       name,
       shellPath,
@@ -772,8 +765,5 @@ class Terminally {
     });
     //this._Terminal =  window.createTerminal("Telnet Terminal");
     this._Terminal.show();
-
-    // dispose of the terminal when closing VSCode
-    // this.pyMakr.context.subscriptions.push(this.term)
   }
 }

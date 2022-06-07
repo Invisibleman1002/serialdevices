@@ -4,6 +4,10 @@
 
 - Do a better job at getting the arduino.json on intial startup.
 
+## [1.0.5] - 06/07/2022
+
+- Documentation update. Code Cleanup. Yes, I see more I need to cleanup.
+
 ## [1.0.4] - 06/06/2022
 
 - Added interactive "telnet" capability.

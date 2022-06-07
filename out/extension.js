@@ -19,8 +19,6 @@ function activate(context) {
         //This doesnt work, yet...   Maybe there is a way to send the port to the Arduino VSC Ext.
         if (node.type === "wifi") {
             serProvider.setclipboard(node);
-            // commands.executeCommand("arduino.selectSerialPort");
-            // sendClipboard();
             serProvider.startSocket(node);
         }
         if (node.jsondata.vendorId &&

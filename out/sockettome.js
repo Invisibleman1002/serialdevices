@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const net = require("net");
-//import {Socket} from "dgram";
 const readline = require("readline");
 class SocketToMe {
     constructor(port, host) {

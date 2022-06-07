@@ -6,9 +6,9 @@ I've tested on these Arduino Telnet Libraries:
 
 - https://github.com/JAndrassy/TelnetStream
 - https://github.com/LennartHennigs/ESPTelnet
-- https://forum.arduino.cc/t/converting-a-serial-menu-to-telnet/894145/66 _Post #66 here talks about how to accept setup command from a telnet interface._
+  - https://forum.arduino.cc/t/converting-a-serial-menu-to-telnet/894145/66 _Post #66 here talks about how to accept setup command from a telnet interface._
 
-  ![TELNET](./assets/Telnet.gif)
+![TELNET](./assets/Telnet.gif)
 
 This is useful for microcontroller development. It lists the Serial Device and allows for giving them an alternate name. So instead of seeing COM3, you can rename it to ESP32_SENSOR.
 
@@ -99,6 +99,7 @@ This was my first Visual Studio Code extension and it changed so many times.
 
 ### Versions
 
+- 1.0.5 06/07/2022 - Documentation update. Code Cleanup.
 - 1.0.4 06/06/2022 - Added interactive "telnet" capability.
 - 1.0.3 05/17/2022 - Dropped `.ino` from the sketch name. Added some _undefined_ checks in case of new arduino.json file.
 - 1.0.2 05/16/2022 - Doing a Serial Scan also refreshes the OTA list and restarts a new scan. The COM description now shows the name of the sketch.

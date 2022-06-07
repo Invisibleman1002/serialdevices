@@ -1,5 +1,4 @@
 import * as net from "net";
-//import {Socket} from "dgram";
 import * as readline from "readline";
 
 class SocketToMe {

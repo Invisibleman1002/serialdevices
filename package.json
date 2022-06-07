@@ -1,10 +1,10 @@
 {
   "name": "serialdevices",
   "displayName": "Serial Devices",
-  "description": "Manage and rename Serial Devices.  View active OTA deice.  A useful tool for dealing with multiple microcontroller com ports.",
+  "description": "View and rename Serial Devices.  View active OTA devices.  A useful tool for dealing with multiple microcontroller com ports.",
   "icon": "images/SerialScanner.png",
   "publisher": "Invisibleman1002",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "engines": {
     "vscode": "^1.66.0"
   },
