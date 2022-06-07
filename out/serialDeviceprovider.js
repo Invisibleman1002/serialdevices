@@ -9,6 +9,8 @@ const fs = require("fs");
 const serialport_1 = require("serialport");
 const bonjour_service_1 = require("bonjour-service");
 class SerialProvider {
+    //private _TelnetMonitor: Terminal; //OutputChannel;
+    //private _clsTerminal: Terminally;
     constructor(storage) {
         this._onDidChangeTreeData = new vscode_1.EventEmitter();
         //private _onDidChangeTreeData: EventEmitter<Dependency | undefined | null | void> = new vscode.EventEmitter<Dependency | undefined | null | void>();
@@ -23,6 +25,13 @@ class SerialProvider {
         this._ArdSKETCH = "";
         this._bonjour = new bonjour_service_1.default();
         this._clsArduino = new Arduino_JSON_Settings();
+        this.startSocket = async (node) => {
+            // let txt: string = "";
+            // if (node.type === "wifi") {
+            //   txt = `${node.jsondata.Caption} : ${node.description}`;
+            // }this._clsTerminal =
+            new Terminally(23, node.description.toString(), node.jsondata.Caption);
+        };
         /*
       //This does not work when we deactivate.  What am I missing?
         deactivate = async () => {
@@ -118,6 +127,10 @@ class SerialProvider {
         this._storage = storage;
         this.Storage_Refresh();
         this.mDNS_start();
+        // this._TelnetMonitor = window.createTerminal("Telnet Terminal"); //window.createOutputChannel("Telnet Monitor");
+        // this._TelnetMonitor.show();
+        // //this._TelnetMonitor.appendLine("TELNET SESSION STARTED.");
+        // this._TelnetMonitor.sendText("TERMINAL LY ILL");
     }
     checkport() {
         this._clsArduino.setActiveCOMport();
@@ -417,6 +430,7 @@ class SerialProvider {
                 //https://code.visualstudio.com/api/references/vscode-api#MarkdownString
                 treeSerialD[i + plus].description = this._OTA[i].address; // this._comChanged[i].Caption;
                 treeSerialD[i + plus].tooltip = new vscode_1.MarkdownString(`Click to rename\n___\n- *IP:=*    **${this._OTA[i].address}**\n- *Host:=*  **${this._OTA[i].host}**\n- *fqdn:=*  **${this._OTA[i].fqdn}**\n- *Board:=* **${this._OTA[i].board}**\n- *AUTH:=* **${this._OTA[i].auth_upload}**`);
+                treeSerialD[i + plus].contextValue = "ota";
                 //  console.log(treeSerialD[i + plus].iconPath);
             }
         }
@@ -546,6 +560,34 @@ class Arduino_JSON_Settings {
         }
         catch (ex) { }
         return undefined;
+    }
+}
+/**
+
+ */
+class Terminally {
+    /**
+   
+     */
+    constructor(port, host, name) {
+        //const clientFile = resolve(__dirname, "socks.js");
+        const clientFile = (0, path_1.resolve)(__dirname, "sockettome.js");
+        //const clientFile = resolve(__dirname, "../src/socks.js");
+        const shellArgs = [clientFile, port.toString(), host];
+        const shellPath = "node";
+        // const name: string = "DoorAlert";
+        // this.log.debug("exec: node", shellArgs.join(" "));
+        //console.log(shellPath);
+        //console.log(shellArgs);
+        this._Terminal = vscode_1.window.createTerminal({
+            name,
+            shellPath,
+            shellArgs,
+        });
+        //this._Terminal =  window.createTerminal("Telnet Terminal");
+        this._Terminal.show();
+        // dispose of the terminal when closing VSCode
+        // this.pyMakr.context.subscriptions.push(this.term)
     }
 }
 //# sourceMappingURL=serialDeviceprovider.js.map

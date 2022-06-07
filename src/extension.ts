@@ -33,8 +33,10 @@ export function activate(context: ExtensionContext) {
     if (node.type === "wifi") {
       serProvider.setclipboard(node);
 
-      commands.executeCommand("arduino.selectSerialPort");
-      sendClipboard();
+      // commands.executeCommand("arduino.selectSerialPort");
+      // sendClipboard();
+
+      serProvider.startSocket(node);
     }
     if (
       node.jsondata.vendorId &&
@@ -54,6 +56,13 @@ export function activate(context: ExtensionContext) {
       sendClipboard();
 
       //commands.executeCommand("arduino.selectSerialPort", "0x0403", "0x6001")
+    }
+  });
+
+  commands.registerCommand("serialdevices.arduino_ota", (node: SerialD) => {
+    if (node.type === "wifi") {
+      serProvider.setclipboard(node);
+      serProvider.startSocket(node);
     }
   });
 

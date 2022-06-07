@@ -1,5 +1,14 @@
 # Serial Devices
 
+**_NEW FEATURE!_** I added the ability to connect to the telnet server on your OTA device.
+You can SEND commands!  
+I've tested on these Arduino Telnet Libraries:
+
+- https://github.com/JAndrassy/TelnetStream
+- https://github.com/LennartHennigs/ESPTelnet
+
+![TELNET](./assets/Telnet.gif)
+
 This is useful for microcontroller development. It lists the Serial Device and allows for giving them an alternate name. So instead of seeing COM3, you can rename it to ESP32_SENSOR.
 
 It also will detect the COM port listed in the arduino.json file and highlights the one currently being used.
@@ -26,19 +35,15 @@ _It seems to be important sometimes for your OTA devices to be on the same netwo
 - Hovering over the COM device shows the Actual com details.
 - Hovering over the OTA shows the OTA details. Full Domain Name, Board Type, etc.
 - Checks the arduino.json file for the current COM port being used, and shows an icon next to the active port.
+- Connect to port 23 on your OTA device and Send/Receive commands.
 
 Pressing the scan button starts a serial device scan. It will continue to run for about 15 seconds or until a device has been plugged-in or removed.  
 You can click on a Device and give it a new name.
 This currently does not use USB device detection. Maybe a future version will.
 
-I have an ESP32 Debugger that shows up as two ports.
-If you notice below the serial numbers are the same for both COM16 and COM17. If I used the serial number as the search criteria, both ports would be named the same.
-
-`{path: 'COM16', manufacturer: 'FTDI', serialNumber: '7&5261f68&0&4', pnpId: 'FTDIBUS\\VID_0403+PID_6010+7&5261F68&0&4&1\\0000', locationId: undefined, …}`
-
-`{path: 'COM17', manufacturer: 'FTDI', serialNumber: '7&5261f68&0&4', pnpId: 'FTDIBUS\\VID_0403+PID_6010+7&5261F68&0&4&2\\0000', locationId: undefined, …}`
-
 When a device is removed, it doesn't disappear from the list right away but shows "removed" as the description. It will be removed upon the next scan unless you plugged it back in.
+
+![TELNET](./assets/Features.gif)
 
 ## Example of the Serial Device scanning
 
@@ -82,20 +87,6 @@ When a device is removed, it doesn't disappear from the list right away but show
 
 - The first video is Chonicler generating the animated gif. The Second video above is Chronicler creating the MP4 file(That HITFILM won't allow editing), I edited it in VSDC, exported it as mp4, then ran the above commands on it.
 
-## HELP
-
-If you have the Arduino extension installed, the code will execute the command below when clicking the Arduino icon.
-The problem is, it just shows the QuickPick window, but wont send it the correct port. Looks like Microsoft would need to update the Arduino Extension to accept parameters.
-
-**This would be cool if worked, but this command doesn't expect any paramters.**
-`commands.executeCommand("arduino.selectSerialPort", "0x0403", "0x6001")`
-
-The above command actually runs this command:
-
-`public async selectSerialPort(vid: string, pid: string)`
-
-Sadly it does not work, just opens the quick pick but doesn't use the details to select the port. I now paste in the selected COM port.
-
 ## Extension Settings
 
 There are no settings as of yet.
@@ -107,6 +98,7 @@ This was my first Visual Studio Code extension and it changed so many times.
 
 ### Versions
 
+- 1.0.4 06/06/2022 - Added interactive "telnet" capability.
 - 1.0.3 05/17/2022 - Dropped `.ino` from the sketch name. Added some _undefined_ checks in case of new arduino.json file.
 - 1.0.2 05/16/2022 - Doing a Serial Scan also refreshes the OTA list and restarts a new scan. The COM description now shows the name of the sketch.
 - 1.0.1 05/15/2022 - When OTA does a refresh, it also reloads the renamed database. So if you renamed a Device in another VC Code window, it will eventually show up in other windows as well. You can manually force the refresh by using the command: `Serial ​Devices: Refresh MDNS`, by clicking `-=Refresh Network=-`, or by Staring another Serial scan.

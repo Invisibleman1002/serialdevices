@@ -19,8 +19,9 @@ function activate(context) {
         //This doesnt work, yet...   Maybe there is a way to send the port to the Arduino VSC Ext.
         if (node.type === "wifi") {
             serProvider.setclipboard(node);
-            vscode_1.commands.executeCommand("arduino.selectSerialPort");
-            sendClipboard();
+            // commands.executeCommand("arduino.selectSerialPort");
+            // sendClipboard();
+            serProvider.startSocket(node);
         }
         if (node.jsondata.vendorId &&
             node.jsondata.productId &&
@@ -32,6 +33,12 @@ function activate(context) {
             vscode_1.commands.executeCommand("arduino.selectSerialPort", valueOfVid, valueOfPid);
             sendClipboard();
             //commands.executeCommand("arduino.selectSerialPort", "0x0403", "0x6001")
+        }
+    });
+    vscode_1.commands.registerCommand("serialdevices.arduino_ota", (node) => {
+        if (node.type === "wifi") {
+            serProvider.setclipboard(node);
+            serProvider.startSocket(node);
         }
     });
     vscode_1.commands.registerCommand("serialdevices.renameEntry", (item) => serProvider.tryrename(item));

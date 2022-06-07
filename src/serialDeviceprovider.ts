@@ -16,11 +16,14 @@ import {
   FileSystemWatcher,
   RelativePattern,
   Uri,
+  OutputChannel,
+  Terminal,
   //CancellationToken,
   // CancellationTokenSource,
   //ProgressLocation,
 } from "vscode";
-import { join } from "path";
+
+import { join, resolve } from "path";
 import * as path from "path";
 import * as fs from "fs";
 import { SerialPort } from "serialport";
@@ -46,7 +49,8 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
   private _ArdSKETCH: string = "";
   private _bonjour: Bonjour = new _bonjour();
   private _clsArduino: Arduino_JSON_Settings = new Arduino_JSON_Settings();
-
+  //private _TelnetMonitor: Terminal; //OutputChannel;
+  //private _clsTerminal: Terminally;
   constructor(storage: Memento) {
     let newwatcher = workspace.createFileSystemWatcher("**/arduino.json");
     newwatcher.onDidChange((uri) => {
@@ -62,13 +66,26 @@ export class SerialProvider implements TreeDataProvider<SerialD> {
 
     this.Storage_Refresh();
     this.mDNS_start();
+    // this._TelnetMonitor = window.createTerminal("Telnet Terminal"); //window.createOutputChannel("Telnet Monitor");
+    // this._TelnetMonitor.show();
+    // //this._TelnetMonitor.appendLine("TELNET SESSION STARTED.");
+    // this._TelnetMonitor.sendText("TERMINAL LY ILL");
   }
+
+  startSocket = async (node: SerialD) => {
+    // let txt: string = "";
+    // if (node.type === "wifi") {
+    //   txt = `${node.jsondata.Caption} : ${node.description}`;
+    // }this._clsTerminal =
+    new Terminally(23, node.description!.toString(), node.jsondata.Caption);
+  };
 
   checkport(): void {
     this._clsArduino.setActiveCOMport();
     this._ArdCOM = this._clsArduino.getActiveCOMport();
     this._ArdSKETCH = this._clsArduino.getActivesketch();
   }
+
   CheckActiveDocument(): void {
     //  console.log("CheckActrive");
     // window.showInformationMessage(
@@ -539,6 +556,7 @@ https://stackoverflow.com/questions/42464838/what-is-the-most-efficient-way-to-d
         treeSerialD[i + plus].tooltip = new MarkdownString(
           `Click to rename\n___\n- *IP:=*    **${this._OTA[i].address}**\n- *Host:=*  **${this._OTA[i].host}**\n- *fqdn:=*  **${this._OTA[i].fqdn}**\n- *Board:=* **${this._OTA[i].board}**\n- *AUTH:=* **${this._OTA[i].auth_upload}**`
         );
+        treeSerialD[i + plus].contextValue = "ota";
         //  console.log(treeSerialD[i + plus].iconPath);
       }
     }
@@ -725,5 +743,37 @@ class Arduino_JSON_Settings {
     } catch (ex) {}
 
     return undefined;
+  }
+}
+
+/**
+
+ */
+class Terminally {
+  private _Terminal: Terminal;
+  /**
+ 
+   */
+  constructor(port: number, host: string, name: string) {
+    //const clientFile = resolve(__dirname, "socks.js");
+    const clientFile = resolve(__dirname, "sockettome.js");
+    //const clientFile = resolve(__dirname, "../src/socks.js");
+    const shellArgs: string[] = [clientFile, port.toString(), host];
+    const shellPath: string = "node";
+    // const name: string = "DoorAlert";
+
+    // this.log.debug("exec: node", shellArgs.join(" "));
+    //console.log(shellPath);
+    //console.log(shellArgs);
+    this._Terminal = window.createTerminal({
+      name,
+      shellPath,
+      shellArgs,
+    });
+    //this._Terminal =  window.createTerminal("Telnet Terminal");
+    this._Terminal.show();
+
+    // dispose of the terminal when closing VSCode
+    // this.pyMakr.context.subscriptions.push(this.term)
   }
 }
